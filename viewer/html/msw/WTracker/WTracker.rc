@@ -1,0 +1,553 @@
+//Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""res\\WTracker.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "#include ""afxres.rc""  \011// Standard components\r\n"
+    "#include ""afxprint.rc""\011// printing/print preview resources\r\n"
+    "\0"
+END
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\idr_main.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open Location",              ID_FILE_OPEN_LOC
+        MENUITEM "Open &File...",               ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "&Print",                      ID_FILE_PRINT
+        MENUITEM SEPARATOR
+        MENUITEM "&Close\tAlt+F4",              ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "&Find...",                    ID_EDIT_FIND
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Reload",                     ID_VIEW_RELOAD
+        MENUITEM "Refresh",                     ID_VIEW_REFRESH
+        MENUITEM SEPARATOR
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "Go"
+    BEGIN
+        MENUITEM "Back\tAlt+<",                 ID_GO_BACK
+        MENUITEM "Forward \tAlt+>",             ID_GO_FORWARD
+        MENUITEM "Home",                        ID_GO_HOME
+        MENUITEM SEPARATOR
+        MENUITEM "Stop Loading",                ID_GO_STOP_LOADING
+    END
+    POPUP "Bookmarks"
+    BEGIN
+        MENUITEM "Add Bookmark",                ID_BOOKMARK_ADD
+        MENUITEM "View Bookmark",               ID_BOOKMARK_VIEW
+        MENUITEM SEPARATOR
+    END
+    POPUP "Options"
+    BEGIN
+        MENUITEM "&Preferences...",             ID_EDIT_PREFERENCES
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Index",                      ID_HELP_INDEX
+        MENUITEM "&Using Help",                 ID_HELP_USING
+        MENUITEM SEPARATOR
+        MENUITEM "&About WebTracker...",        ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          ID_HELP,                VIRTKEY, NOINVERT
+    VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SPLASH DIALOG DISCARDABLE  0, 0, 200, 190
+STYLE DS_MODALFRAME | WS_POPUP
+FONT 10, "Arial"
+BEGIN
+    CTEXT           "Pueblo\231 version %s",IDC_VERSION_STRING,6,120,188,8,
+                    NOT WS_GROUP
+    CTEXT           "Copyright \251 1995, Chaco Communications, Inc.\nAll rights reserved.",
+                    IDC_STATIC,6,129,188,17,NOT WS_GROUP
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,6,151,188,1
+    CONTROL         "",IDC_CHACO_LOGO,"Button",BS_OWNERDRAW | WS_DISABLED | 
+                    WS_TABSTOP,60,5,80,105
+    CTEXT           "This software contains trade secrets of Chaco Communications, Inc.  Terms and conditions of use, duplication, and disclosure are detailed in the About box.",
+                    IDC_STATIC,6,159,188,25
+END
+
+IDD_PREF_CONNECTION DIALOG DISCARDABLE  0, 0, 250, 130
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Home Page"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "&Home Page:",IDC_STATIC,7,12,42,8
+    EDITTEXT        IDC_CONN_EDIT_ADDRESS,58,10,160,13,ES_AUTOHSCROLL
+END
+
+IDD_ABOUT_TEAM DIALOG DISCARDABLE  0, 0, 250, 125
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "The Team"
+FONT 10, "Arial"
+BEGIN
+    CONTROL         "",IDC_CHACO_LOGO,"Button",BS_OWNERDRAW | WS_DISABLED | 
+                    WS_TABSTOP,5,10,80,105
+    LTEXT           "The Chaco Pueblo Team:",IDC_STATIC,111,13,89,8
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,101,23,139,1
+    RTEXT           "",IDC_NAME_1,161,33,69,8
+    RTEXT           "",IDC_NAME_2,161,46,69,8
+    RTEXT           "",IDC_NAME_3,161,59,69,8
+    RTEXT           "",IDC_NAME_4,161,72,69,8
+    RTEXT           "",IDC_NAME_5,161,85,69,8
+END
+
+IDD_PREF_FONT DIALOG DISCARDABLE  0, 0, 250, 130
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Fonts"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Proportional Font: ",IDC_STATIC,7,44,58,8
+    LTEXT           "Times New Roman",IDC_STAT_PROPORTIONAL,71,44,83,8
+    PUSHBUTTON      "Change...",IDC_CHOOSE_PROPORTIONAL,161,41,49,14
+    RTEXT           "Fixed Font: ",IDC_STATIC,7,71,58,8
+    LTEXT           "Terminal",IDC_STAT_FIXED,71,71,83,8
+    PUSHBUTTON      "Change...",IDC_CHOOSE_FIXED,161,68,49,14
+END
+
+IDD_CACHE DIALOG DISCARDABLE  0, 0, 250, 100
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Cache "
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Disk Cache:",IDC_STATIC,33,18,38,8
+    EDITTEXT        IDC_CACHE_SIZE,75,16,35,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Clear Cache",IDC_CLR_CACHE,179,15,61,14
+    RTEXT           "Disk Cache Directory:",IDC_STATIC,3,42,68,8
+    EDITTEXT        IDC_CACHE_DIR,75,40,165,13,ES_AUTOHSCROLL
+    LTEXT           "Kilobytes",IDC_STATIC,112,18,30,9
+    LTEXT           "Verify Documents:",IDC_STATIC,7,65,63,8
+    CONTROL         "&Once per Session",IDC_VRFY_SESSION,"Button",
+                    BS_AUTORADIOBUTTON,75,63,67,10
+    CONTROL         "&Every Time",IDC_VRFY_EVERYTIME,"Button",
+                    BS_AUTORADIOBUTTON,153,63,46,10
+    CONTROL         "&Never",IDC_VRFY_NEVER,"Button",BS_AUTORADIOBUTTON,210,
+                    63,29,10
+END
+
+IDD_NETWORK DIALOG DISCARDABLE  0, 0, 250, 130
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Network"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Connections: ",IDC_STATIC,9,17,41,8
+    EDITTEXT        IDC_MAX_CONN,51,15,31,14,ES_AUTOHSCROLL
+    LTEXT           "(Maximum number of simultaneous network connections)",
+                    IDC_STATIC,91,15,150,17
+END
+
+IDD_LOCBAR DIALOG DISCARDABLE  0, 0, 382, 28
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Location:",IDC_STATIC,4,10,31,8
+    COMBOBOX        IDC_CURR_URL,39,8,304,78,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Generic1",IDC_NET_ACTIVE,"SysAnimate32",WS_TABSTOP | 
+                    0x3,356,1,20,20
+END
+
+IDD_OPEN_LOCATION DIALOG DISCARDABLE  0, 0, 256, 54
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Open Location"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Open &Location:",IDC_STATIC,7,5,241,8
+    COMBOBOX        IDC_EDIT_LOC,7,19,241,72,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "&Open",IDOK,71,38,37,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,146,38,37,14
+END
+
+IDD_PREF_COLORS DIALOG DISCARDABLE  0, 0, 250, 130
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Colors"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Normal Text",IDC_SAMPLE_TEXT,"Button",BS_OWNERDRAW | 
+                    WS_DISABLED | WS_TABSTOP,182,42,50,12
+    CONTROL         "Links",IDC_SAMPLE_LINK,"Button",BS_OWNERDRAW | 
+                    WS_DISABLED | WS_TABSTOP,182,59,50,12
+    CONTROL         "Followed",IDC_SAMPLE_FLINK,"Button",BS_OWNERDRAW | 
+                    WS_DISABLED | WS_TABSTOP,182,76,50,12
+    CONTROL         "Prefetched",IDC_SAMPLE_PLINK,"Button",BS_OWNERDRAW | 
+                    WS_DISABLED | WS_TABSTOP,182,93,50,12
+    CONTROL         "",IDC_SAMPLE_BACK,"Button",BS_OWNERDRAW | WS_DISABLED | 
+                    WS_TABSTOP,180,20,55,90
+    GROUPBOX        "Sample",IDC_STATIC,175,7,65,108
+    RTEXT           "Background:",IDC_STATIC,10,27,65,8
+    COMBOBOX        IDC_COMBO_BACK_COLOR,81,25,83,100,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Text:",IDC_STATIC,10,44,65,8
+    COMBOBOX        IDC_COMBO_TEXT_COLOR,81,42,83,100,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Links:",IDC_STATIC,10,61,65,8
+    COMBOBOX        IDC_COMBO_LINK_COLOR,81,59,83,100,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Followed links:",IDC_STATIC,10,78,65,8
+    COMBOBOX        IDC_COMBO_FLINK_COLOR,81,76,83,100,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Prefetched links:",IDC_STATIC,10,95,65,8
+    COMBOBOX        IDC_COMBO_PLINK_COLOR,81,93,83,100,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_ABOUT_BOX DIALOG DISCARDABLE  0, 0, 260, 125
+STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "WebTracker"
+FONT 10, "Arial"
+BEGIN
+    CONTROL         "",IDC_CHACO_LOGO,"Button",BS_OWNERDRAW | WS_TABSTOP,10,
+                    10,70,104
+    LTEXT           "Copyright \251 1995, Chaco Communications, Inc. All rights reserved.",
+                    IDC_COPYRIGHT,100,45,150,16,SS_NOPREFIX
+    LTEXT           "RESTRICTED RIGHTS LEGEND",IDC_LEGEND,100,72,150,8,
+                    SS_NOPREFIX
+    LTEXT           "Use, duplication, or disclosure by the Government is subject to restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in Technical Data and Computer Software clause at DFARS 252.227-7013.",
+                    IDC_CLAUSE,100,81,150,40,SS_NOPREFIX
+    LTEXT           "WebTracker",IDC_PROD_NAME,100,10,150,12,SS_NOPREFIX
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,100,25,150,1
+    RTEXT           "version number 1.0",IDC_STATIC_VERSION,100,27,150,8,
+                    SS_NOPREFIX
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,0,0,0
+ PRODUCTVERSION 2,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "PUEBLO MFC Application\0"
+            VALUE "FileVersion", "2, 0, 0, 0\0"
+            VALUE "InternalName", "PUEBLO\0"
+            VALUE "LegalCopyright", "Copyright \251 1994\0"
+            VALUE "OriginalFilename", "Pueblo.exe\0"
+            VALUE "ProductName", "Pueblo Application\0"
+            VALUE "ProductVersion", "2, 0, 0, 0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// HTML
+//
+
+IDR_COPYRIGHT           HTML    DISCARDABLE     "res\\idr_cprt.htm"
+IDR_DISCLAIMER          HTML    DISCARDABLE     "res\\idr_disc.htm"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DIB
+//
+
+IDR_CHACO_DIB           DIB     DISCARDABLE     "res\\chaco.dib"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "WebTracker\n\nWebTracker\nWebTracker Files (*.htm)\n.HTM\nWebTracker.Document\nWebTracker Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "WebTracker"
+    AFX_IDS_IDLEMESSAGE     "For Help, press F1"
+    AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_OPEN            "Open a local file to view"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Close the current window\nClose"
+    ID_HELP_INDEX           "List Help topics\nHelp Index"
+    ID_HELP_USING           "Display instructions about how to use help\nHelp"
+    ID_CONTEXT_HELP         "Display help for clicked on buttons, menus and windows\nHelp"
+    ID_HELP                 "Display help for current task or command\nHelp"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+    IDS_TITLE_PREFS_DLG     "Preferences"
+    IDS_ABOUT_TITLE         "About..."
+    IDS_CONNECT_FAILED      "The remote server closed the connection."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_PREFERENCES     "Change user preferences for WebTracker"
+    ID_FILE_OPEN_LOC        "Open a remote document\nOpen"
+    ID_VIEW_RELOAD          "Reload the current document.\nReload"
+    ID_VIEW_REFRESH         "Redraw the current document\nRefresh"
+    ID_GO_BACK              "Return to the previous document\nBack"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_PREV_PANE           "<< Back"
+    IDS_NEXT_PANE           "Next >>"
+    IDS_DONE                "Done"
+    IDS_TEAM_GLENN          "Glenn Crocker"
+    IDS_TEAM_JIM            "Jim Doubek"
+    IDS_TEAM_PRITHAM        "Pritham Shetty"
+    IDS_TEAM_RON            "Ron 'Coyote' Lussier"
+    IDS_TEAM_DAN            "Dan Greening"
+    IDS_INVALID_CACHE_DIR   "Disk cache directory: %s is invalid."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_GO_FORWARD           "Move forward to the next document\nForward"
+    ID_GO_HOME              "Go to the home page\nHome"
+    ID_GO_STOP_LOADING      "Stop the current transfer\nStop"
+    DI_BOOKMARK_ADD         "Add a new bookmark"
+    ID_BOOKMARK_VIEW        "View all bookmarks."
+    ID_BOOKMARK_ADD         "Add bookmarks."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDP_SOCKETS_INIT_FAILED "Windows sockets initialization failed."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_PROGRESS_BAR        "                                  "
+    IDS_ERROR_404           "The requested URL %s  was not found on this server."
+    IDS_ERROR_301           "The requested URL %s has moved permanently."
+    IDS_ERROR_302           "The requested URL %s has moved temporarily."
+    IDS_ERROR_408           "Request timeout on URL %s."
+    IDS_ERROR_501           "Internal server error on URL %s."
+    IDS_ERROR_502           "Server reports bad gateway error on URL %s."
+    IDS_ERROR_504           "Gateway timeout on URL %s."
+    IDS_ERROR_400           "Bad request on URL %s."
+    IDS_ERROR_503           "Server is currently unable to handle request for URL %s."
+    IDS_ERROR_602           "Request %s failed : Unable to connect to server."
+    IDS_ERROR_603           "Request failed %s : Unable to send request."
+    IDS_ERROR_604           "Request failed %s :Invalid header."
+    IDS_ERROR_608           "Request failed %s : Bad URL."
+    IDS_ERROR_5XX           "Request failed %s :Server error."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ERROR_4XX           "Request failed %s : Client error."
+    IDS_TEXT_COLOR          "(default color)"
+    IDS_OPEN_WEB_TRACKER_FILTER 
+                            "HTML Files (*.htm )|*.htm|All Files (*.*)|*.*||"
+END
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "res\WTracker.rc2"  // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+#include "afxres.rc"  	// Standard components
+#include "afxprint.rc"	// printing/print preview resources
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

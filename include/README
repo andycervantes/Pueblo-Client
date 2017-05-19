@@ -1,0 +1,4 @@
+This directory contains shared include files for the Pueblo project.
+On your platform, these files should be placed into a \chaco\include
+directory, and your include path (or compiler) should point to this
+directory.

@@ -1,0 +1,268 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""res\\ChText.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "#include ""afxres.rc""  // Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Andromedia Incorporated\0"
+            VALUE "FileDescription", "CHTEXT MFC Extension DLL\0"
+            VALUE "FileVersion", "1, 0, 0, 0\0"
+            VALUE "InternalName", "CHTEXT\0"
+            VALUE "LegalCopyright", "Copyright © 1996-1998 Andromedia Incorporated\0"
+            VALUE "OriginalFilename", "CHTEXT.DLL\0"
+            VALUE "ProductName", "CHTEXT Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PREF_PAGE_TEXT_OUT DIALOG DISCARDABLE  0, 0, 250, 125
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Text Output"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Scroll-back buffer size (in lines):",IDC_STATIC,10,10,
+                    100,8
+    EDITTEXT        IDC_EDIT_LINES,114,8,24,13,ES_AUTOHSCROLL
+END
+
+IDD_PREF_PAGE_TEXT_IN DIALOG DISCARDABLE  0, 0, 250, 125
+STYLE DS_NOIDLEMSG | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Text Input"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Height of the edit window:",IDC_STATIC,10,20,85,8
+    EDITTEXT        IDC_EDIT_LINE_COUNT,102,18,13,13,ES_AUTOHSCROLL
+    CONTROL         "Clear text after it's sent",IDC_CHECK_CLEAR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,20,45,95,10
+    GROUPBOX        "Editing keys",IDC_STATIC,125,10,115,50,WS_GROUP
+    CONTROL         "Windows standard",IDC_RADIO_WINDOWS,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,135,25,87,10
+    CONTROL         "Emacs standard",IDC_RADIO_EMACS,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,135,40,87,10
+    RTEXT           "(in lines)",IDC_STATIC,10,29,85,8
+    PUSHBUTTON      "Select:",IDC_TINTIN_FILE,25,87,45,14
+    LTEXT           "<no file>",IDC_STATIC_TINTIN_FILE,80,90,150,8
+    GROUPBOX        "Initial TinTin command file:",IDC_STATIC,10,70,230,40
+END
+
+IDD_TINTIN_WIZLIST DIALOG DISCARDABLE  0, 0, 250, 150
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Wizard List"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,100,130,50,14
+    CTEXT           "Pueblo's implementation of TinTin is based on TinTin++",
+                    IDC_STATIC,10,10,230,8
+    CTEXT           "Many people on the Internet contributed to the development and implementation of TinTin.  Those deserving special mention include:",
+                    IDC_STATIC,10,30,230,20
+    CTEXT           "Peter Unold, Bill Reiss, Joann Ellsworth, and Jeremy Jack.",
+                    IDC_STATIC,10,90,230,8
+    CTEXT           "All of the folks who sent in bug reports and suggestions.",
+                    IDC_STATIC,10,80,230,8
+    CTEXT           "The citizens of GrimneDIKU, and especially Nemesis, Urquan, Elvworn, Kare, Merjon, Grumm, Tolebas, Winterblade.",
+                    IDC_STATIC,10,60,230,16
+    CTEXT           "Valgar of Grimne",IDC_STATIC,10,50,230,8
+    CTEXT           "Pueblo implementation by Coyote.",IDC_STATIC,10,110,230,
+                    8
+END
+
+IDD_TINTIN_INFO DIALOG DISCARDABLE  0, 0, 240, 140
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "TinTin Information"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,100,120,50,14
+    GROUPBOX        "Defined:",IDC_STATIC,10,10,90,95
+    LTEXT           "%3d Actions",IDC_STATIC_ACTIONS,20,25,75,8
+    LTEXT           "%3d Aliases",IDC_STATIC_ALIASES,20,35,75,8
+    LTEXT           "%3d Substitutes",IDC_STATIC_SUBS,20,45,75,8
+    LTEXT           "%3d Antisubstitutes",IDC_STATIC_ANTISUBS,20,55,75,8
+    LTEXT           "%3d Variables",IDC_STATIC_VARS,20,65,75,8
+    LTEXT           "%3d Highlights",IDC_STATIC_HIGHLIGHTS,20,75,75,8
+    GROUPBOX        "Flags:",IDC_STATIC,110,10,119,95
+    LTEXT           "Speedwalking:",IDC_STATIC,120,25,80,8
+    LTEXT           "Start quotes:",IDC_STATIC,120,35,80,8
+    LTEXT           "Do actions:",IDC_STATIC,120,55,80,8
+    LTEXT           "off",IDC_STATIC_SPEEDWALKING,202,25,20,8
+    LTEXT           "off",IDC_STATIC_STARTQUOTES,202,35,20,8
+    LTEXT           "yes",IDC_STATIC_DO_ACTIONS,202,55,20,8
+    LTEXT           "Do substitutes:",IDC_STATIC,120,65,80,8
+    LTEXT           "yes",IDC_STATIC_DO_SUBS,202,65,20,8
+    LTEXT           "Substituted output can trigger actions ('presub'):",
+                    IDC_STATIC,120,83,80,16
+    LTEXT           "yes",IDC_STATIC_PRESUBS,202,91,20,8
+END
+
+IDD_SELECT_TINTIN DIALOG DISCARDABLE  36, 24, 264, 134
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select a TinTin command file"
+FONT 8, "Helv"
+BEGIN
+    LTEXT           "File &Name:",1090,6,6,76,9
+    EDITTEXT        1152,6,16,90,12,ES_AUTOHSCROLL | ES_OEMCONVERT
+    LISTBOX         1120,6,32,90,68,LBS_SORT | LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_DISABLENOSCROLL | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "&Directories:",-1,110,6,92,9
+    LTEXT           "",1088,110,18,92,9,SS_NOPREFIX
+    LISTBOX         1121,110,32,92,68,LBS_SORT | LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_DISABLENOSCROLL | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "&Read Only",1040,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
+                    WS_TABSTOP,6,91,50,12
+    LTEXT           "List Files of &Type:",1089,6,104,90,9
+    COMBOBOX        1136,6,114,90,36,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | 
+                    WS_BORDER | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Dri&ves:",1091,110,104,92,9
+    COMBOBOX        1137,110,114,92,68,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | 
+                    CBS_AUTOHSCROLL | CBS_SORT | CBS_HASSTRINGS | WS_BORDER | 
+                    WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,208,6,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,208,23,50,14,WS_GROUP
+    PUSHBUTTON      "None",IDC_NO_TINTIN_FILE,208,40,50,14
+    PUSHBUTTON      "&Help",1038,208,84,50,14,WS_GROUP
+    PUSHBUTTON      "Net&work...",1037,208,111,50,14,WS_GROUP
+END
+
+IDD_SELECT_TINTIN_95 DIALOG DISCARDABLE  36, 24, 272, 40
+STYLE WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
+FONT 8, "Helv"
+BEGIN
+    PUSHBUTTON      "&None",IDC_NO_TINTIN_FILE,222,20,50,14
+    LTEXT           "",stc32,0,0,272,20,NOT WS_VISIBLE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TEXT_INPUT_EDIT     "Enter Pueblo commands in this edit field\nCommands"
+    IDS_WND_MENU_INPUT_TXT  "Sets focus to the Command input window"
+    IDS_WND_MENU_INPUT      "Input window"
+    IDS_WND_MENU_INPUT_ACC  "I (only first char is used)"
+    IDS_JUMP_HINT           "Click this label to jump to the page"
+    IDS_ALL_TYPES           "<All world types>"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_LINES_OUT_OF_RANGE  "Please select a height of between 1 and %d lines."
+    IDS_TINTIN_NO_FILE      "<no file>"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_OPEN_TINTIN_TITLE   "Select a TinTin command file"
+    IDS_OPEN_TINTIN_FILTER  "TinTin command file (*.txt)|*.txt|All Files (*.*)|*.*||"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "res\ChText.rc2"  // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+#include "afxres.rc"  // Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

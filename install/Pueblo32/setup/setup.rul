@@ -1,0 +1,1115 @@
+/*----------------------------------------------------------------------------
+
+            .###.  ###     ###       ,#,          .###.    ,#######,
+         ,####""   ###    .###     ,##'##,     ,####""   .##'    `##.
+        ###        ###########    ,##' `##,   ###       ####      ####
+        ###..      ###'    ###  ,###########, ####..    `###,    ,##'
+          `######  ###     ###  `##'     `##'   `######   `########'
+
+
+	Copyright 1996, Chaco Communications, Inc. All rights reserved.
+	Unpublished -- Rights reserved under the copyright laws of the United
+	States.  Use of a copyright notice is precautionary only and does no
+	imply publication or disclosure.
+
+	This software contains confidential information and trade secrets of
+	Chaco Communications, Inc.  Use, disclosure, or reproduction is
+	prohibited without the prior express written permission of Chaco
+	Communications, Inc.
+
+	RESTRICTED RIGHTS LEGEND
+
+	Use, duplication, or disclosure by the Government is subject to
+	restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+	Technical Data and Computer Software clause at DFARS 252.227-7013.
+
+	Chaco Communications, Inc.
+	10164 Parkwood Drive, Suite 8, Cupertino, CA, 95014-1533
+
+------------------------------------------------------------------------------
+
+	InstallSHIELD 32-bit Pueblo32 install script.
+
+----------------------------------------------------------------------------*/
+
+// $Header: /home/cvs/chaco/install/Pueblo32/setup/setup.rul,v 1.37 1996/09/23 16:47:39 coyote Exp $
+
+
+/*----------------------------------------------------------------------------
+	Constants
+----------------------------------------------------------------------------*/
+
+#ifndef( WIN16 )
+	#ifndef( WIN32S )
+		#define WIN32		1
+	#endif
+#endif
+
+#define APP_NAME				"Pueblo"
+#define PROGRAM_FOLDER_NAME		"Pueblo"
+#define APPBASE_PATH_WIN95		"\\Program Files\\Pueblo\\"
+#define APPBASE_PATH_WINNT		"\\bin\\Pueblo\\"
+#define APPBASE_PATH_WIN32S		"\\bin\\Pueblo\\"
+
+#define SHARED_SPACE_REQUIRED		1900000		// Disk space in bytes for system
+#define SHARED_SPACE_REQUIRED_STR	"1,900,000"
+#define SPACE_REQUIRED				4000000		// Disk space in bytes for Pueblo
+#define SPACE_REQUIRED_STR			"4,000,000"
+#define TOTAL_SPACE_REQUIRED_STR	"5,900,000"	// Sum of disk space
+
+#define COMPANY_NAME			"Chaco Communications, Inc."
+#define PRODUCT_NAME			"Pueblo"
+#define PRODUCT_VERSION			"2.01"
+											// Deinstall keys
+#define PRODUCT_KEY				"pueblo.exe"
+#define DEINSTALL_KEY			"Pueblo 2.01"
+#define UNINSTALL_NAME			"Pueblo 2.01"
+
+#define INSTALL_BACKGROUND		RGB( 128, 0, 0 )
+
+#define STR_DEFTAB				"    "
+
+#define GENERAL_GROUP			"General"
+#define CH_CONNECTION_GROUP		"Connection"
+#define CH_CONNECTION_HOST			"Host"
+#define CH_CONNECTION_HOST_DEF			"zuni.chaco.com"
+#define CH_CONNECTION_PORT			"Port"
+#define CH_CONNECTION_PORT_DEF			"3143"
+
+
+/*----------------------------------------------------------------------------
+	MessageBox flags
+----------------------------------------------------------------------------*/
+
+#define MB_OK                       0x00000000
+#define MB_OKCANCEL                 0x00000001
+#define MB_ABORTRETRYIGNORE         0x00000002
+#define MB_YESNOCANCEL              0x00000003
+#define MB_YESNO                    0x00000004
+#define MB_RETRYCANCEL              0x00000005
+
+#define IDOK						1
+#define IDCANCEL					2
+#define IDABORT						3
+#define IDRETRY						4
+#define IDIGNORE					5
+#define IDYES						6
+#define IDNO						7
+
+
+/*----------------------------------------------------------------------------
+	Declaration block
+----------------------------------------------------------------------------*/
+
+declare
+
+#include "sddialog.h"   // Include script dialog definitions.
+
+
+/*----------------------------------------------------------------------------
+	Global variables
+----------------------------------------------------------------------------*/
+
+STRING  svFolder, szMsg, szFileSet, szTitle;
+STRING  svTarget, svProgram, szTemp, svName, svCompany, szComponentList;
+STRING	svPath, szTargetDisk, szSystemDisk;
+STRING  svUninstLogFile, szAppPath, szRegKey;
+BOOL    boolOneDrive, boolSpaceOk;
+NUMBER	nSpaceRequired;
+NUMBER  nResult, nType, nOSVersion, nCmdValue;
+NUMBER 	nPos;
+STRING	svMfcVer, svMfcNVer, svMsvc20Ver, svComCtl32Ver;
+LIST    listInfo;
+
+BOOL	boolFoundNavigator;
+STRING	svNavigatorDir;
+
+NUMBER  nSize;
+STRING  szScript;
+NUMBER 	boolInstallRL;
+STRING	szRL, szRLVersionKey;
+
+#ifdef( WIN16 )
+
+BOOL	boolInstallWin32s;
+STRING 	szWin32s;
+STRING 	szVersion;
+
+#endif
+
+
+/*----------------------------------------------------------------------------
+	Function declarations
+----------------------------------------------------------------------------*/
+
+prototype SetupScreen();
+prototype CheckRequirements();
+prototype GetBrowserDirectories();
+prototype AskWhichBrowsers();
+prototype ConstructInfoList( LIST );
+prototype CreateRegDBEntries();
+prototype SetupFileTransfer( STRING, STRING );
+
+prototype InstallRL();
+
+#ifdef( WIN32S )
+
+prototype InstallWin32s();
+
+#endif
+
+prototype PerformFileTransfer( STRING );
+prototype SetupFinish();
+
+prototype GetSystemFileVersions( STRING, STRING, STRING, STRING );
+
+
+/*----------------------------------------------------------------------------
+	Program block
+----------------------------------------------------------------------------*/
+
+program
+
+
+/*----------------------------------------------------------------------------
+	Script entrypoint
+----------------------------------------------------------------------------*/
+
+StartHere:
+		Disable( BACKGROUND );
+
+											/* Determine target system's
+												operating system */
+
+		GetSystemInfo( OS, nOSVersion, szTemp );
+
+        									/* Set installation info, which is
+        										required for registry
+        										entries */
+
+		InstallationInfo( COMPANY_NAME, PRODUCT_NAME, PRODUCT_VERSION,
+       						PRODUCT_KEY );
+
+											// Set up the installation screen
+		SetupScreen();
+		Enable( DIALOGCACHE );
+
+		#ifdef( WIN32 )
+											/* Check to see if they're using
+												the Win16 version on Windows
+												NT or Windows 95 */
+
+			if ((IS_WIN32S = nOSVersion) || (IS_WINDOWS = nOSVersion)) then
+
+				SetDialogTitle( DLG_MSG_WARNING, "Wrong version!" );
+
+				szMsg = "You are attempting to install the 32-bit version " +
+						"of Pueblo on Windows 3.1.  You should download and " +
+						"install the 16-bit version of Pueblo from the " +
+						"Pueblo web site at\n" +
+						"          http://www.chaco.com/pueblo/";
+
+				MessageBox( szMsg, WARNING );
+				exit;
+			endif;
+
+		#else	/* ifdef( WIN32 ) */
+											/* Check to see if they're using
+												the Win16 version on Windows
+												NT or Windows 95 */
+
+			if (IS_WINDOWSNT = nOSVersion || IS_WINDOWS95 = nOSVersion) then
+				SetDialogTitle( DLG_MSG_WARNING, "Wrong version!" );
+
+				szMsg = "You are attempting to install the 16-bit version " +
+						"of Pueblo on Windows 95 or Windows NT.  You should " +
+						"download and install the 32-bit version of Pueblo " +
+						"from the Pueblo web site at\n" +
+						"          http://www.chaco.com/pueblo/";
+
+				MessageBox( szMsg, WARNING );
+				exit;
+			endif;
+		#endif	/* ifdef( WIN32 ) */
+
+	DoInstallWin32s: 
+		boolInstallRL = TRUE;
+
+		#ifdef( WIN16 )
+			boolInstallWin32s = FALSE;
+
+			if ((IS_WIN32S = nOSVersion) || (IS_WINDOWS = nOSVersion)) then 
+	
+	    		szWin32s = WINSYSDIR ^ "win32s.ini";
+				GetProfString( szWin32s, "Win32s", "Version", szVersion );
+
+				if (StrLength( szVersion ) <= 0) then
+					boolInstallWin32s = TRUE;
+				elseif (!(szVersion % "1.30")) then
+					boolInstallWin32s = TRUE;
+				endif;
+			endif;
+			
+			#ifndef( WIN32S )
+
+			if (boolInstallWin32s) then
+
+				SetDialogTitle( DLG_MSG_INFORMATION, "Win32s required!" );
+				szMsg = "Pueblo uses Win32s version 1.30 or later to run " +
+						"under Windows 3.1.  You can continue the " +
+						"installation but Win32s should be installed before " +
+						"using Pueblo.\n\n" +
+						"Please refer to the readme file for a list of " +
+						"locations from where you can download Win32s." ;
+
+				MessageBox( szMsg, INFORMATION );
+			endif;
+			#endif	/* ifndef( WIN32S ) */
+
+		#endif	/* ifdef( WIN32 ) */
+
+		RegDBSetDefaultRoot( HKEY_LOCAL_MACHINE );
+		szRLVersionKey = "SOFTWARE\\" + "Microsoft" + "\\" +
+							"Reality Lab" + "\\" + "2.0";
+		if (RegDBGetKeyValueEx( szRLVersionKey, "Version", nType, szRL,
+									nSize ) = 0) then
+
+										// Get the build number
+
+			if (StrSub( szRLVersionKey,  szRL, 6,
+						(StrLength( szRL ) - 6 ) )) then
+				if (StrToNum( nCmdValue, szRLVersionKey ) = 0 &&
+						nCmdValue >= 33) then
+					boolInstallRL = FALSE;
+				endif;
+			endif;
+		endif;
+											/* Restore the default root */
+	
+		RegDBSetDefaultRoot( HKEY_CLASSES_ROOT );
+
+											// Create a Welcome dialog
+	WelcomeDlg:
+		Disable( BACKBUTTON );
+		SdProductName( PRODUCT_NAME );
+		SdWelcome( "", "" );
+		Enable( BACKBUTTON );
+											/* Test target system for proper
+												configuration */
+		CheckRequirements();
+		GetBrowserDirectories();
+
+		if (RegDBGetItem( REGDB_APPPATH, svTarget ) = 0) then
+			nPos = StrFind( svTarget, ";" );
+			if (nPos >= 0) then
+				StrSub( szTemp, svTarget, 0, nPos );
+				svTarget = szTemp;
+			endif;
+		else
+			if (IS_WINDOWS95 = nOSVersion) then
+				svTarget = TARGETDISK ^ APPBASE_PATH_WIN95;
+			elseif (IS_WINDOWSNT = nOSVersion) then
+				svTarget = TARGETDISK ^ APPBASE_PATH_WINNT;
+			else
+				svTarget = TARGETDISK ^ APPBASE_PATH_WIN32S;
+			endif;
+		endif;
+
+	GetTargetDirectory:
+											// Get the destination directory
+		szMsg = "";
+		nResult = AskDestPath( "", szMsg, svTarget, 0 );
+
+		if (nResult = BACK) then
+			goto WelcomeDlg;
+		endif;
+
+		svProgram = svTarget ^ "Pueblo.exe";
+											/* Perform space check of target
+												drive */
+		boolSpaceOk = TRUE;
+		GetDisk( svTarget, szTargetDisk );
+		GetDisk( WINSYSDIR, szSystemDisk );
+
+		if (0 = StrCompare( szTargetDisk, szSystemDisk )) then
+			boolOneDrive = TRUE;
+			
+			nSpaceRequired = SPACE_REQUIRED + SHARED_SPACE_REQUIRED;
+			szTemp = TOTAL_SPACE_REQUIRED_STR;
+		else
+			boolOneDrive = FALSE;
+
+			nSpaceRequired = SPACE_REQUIRED;
+			szTemp = SPACE_REQUIRED_STR;
+		endif;
+
+		if (GetDiskSpace( szTargetDisk ) < nSpaceRequired) then
+			szMsg = "There is not enough space available on the disk " +
+					"'" + szTargetDisk + "'.  Pueblo requires " +
+					szTemp + " bytes of disk space on this drive.\n\n" +
+					"If you are overwriting existing files, there may be " +
+					"enough space.  Do you want to try installing anyway?";
+
+			SetDialogTitle( DLG_MSG_WARNING, "Not enough disk space!" );
+			if (IDNO = MessageBox( szMsg, WARNING | MB_YESNO )) then
+				boolSpaceOk = FALSE;
+			endif;
+		endif;
+											/* If not enough space, ask user
+												to try again */
+
+		if (!boolSpaceOk) goto GetTargetDirectory;
+
+		if (!boolOneDrive) then
+											/* Perform space check of system
+												drive */
+
+			if (GetDiskSpace( szSystemDisk ) < SHARED_SPACE_REQUIRED) then
+				szTemp = SHARED_SPACE_REQUIRED_STR;
+
+				szMsg = "There is not enough space available on the system " +
+						"disk '" + szSystemDisk + "' to install Pueblo.  " +
+						"The system files that Pueblo installs require " +
+						szTemp + " bytes of disk space.\n\n" +
+						"If you already have some of these system files, " +
+						"there may be enough space.\n\n" +
+						"Do you want to try installing anyway?";
+
+				SetDialogTitle( DLG_MSG_WARNING, "Not enough disk space!" );
+				if (IDNO = MessageBox( szMsg, WARNING | MB_YESNO )) then
+					boolSpaceOk = FALSE;
+				endif;
+			endif;
+											/* If not enough space, ask user
+												to try again */
+
+			if (!boolSpaceOk) goto GetTargetDirectory;
+		endif;
+
+	SelectBrowsers:
+		if (boolFoundNavigator) then
+			nResult = AskWhichBrowsers();
+			if (nResult = BACK) then
+				goto GetTargetDirectory;
+			endif;
+		endif;
+
+	GetProgramFolderInfo:
+		svFolder = PROGRAM_FOLDER_NAME;
+		nResult = SdSelectFolder( "", "", svFolder );
+		if (nResult = BACK) then
+			if (boolFoundNavigator) then
+				goto SelectBrowsers;
+			else
+				goto GetTargetDirectory;
+			endif;
+		endif;
+
+	ConfirmCopy:
+											/* Show SdStartCopy dialog to
+												confirm file transfer
+												operation */
+		listInfo = ListCreate( STRINGLIST );
+		ConstructInfoList( listInfo );
+
+		szMsg = "Setup has enough information to start copying Pueblo " +
+				"files.  If you want to review or change any settings, " +
+				"click Back.  If you are satisfied with the settings, " +
+				"click Next to begin copying files.";
+		if (SdStartCopy( "", szMsg, listInfo ) = BACK) then
+			ListDestroy( listInfo );
+			goto GetProgramFolderInfo;
+		endif;
+
+		ListDestroy( listInfo );
+
+	SetupRegAndUninstall:
+											// Save old version numbers
+
+		GetSystemFileVersions( svMfcVer, svMfcNVer, svMsvc20Ver, svComCtl32Ver );
+
+											/* Prepare InstallSHIELD to record
+												deinstallation information */
+
+		DeinstallStart( svTarget, svUninstLogFile, DEINSTALL_KEY, 0 );
+		RegDBSetItem( REGDB_UNINSTALL_NAME, UNINSTALL_NAME );
+
+											/* Set the App Paths key for the
+												main program */
+		szAppPath = svTarget + ";";
+		RegDBSetItem( REGDB_APPPATH, szAppPath );
+		RegDBSetItem( REGDB_APPPATH_DEFAULT, svProgram );
+
+	SetupAndDecompFiles:
+		szFileSet = "Pueblo";
+		SetupFileTransfer( szComponentList, szFileSet );
+
+											/* Set up progress indicator and
+												information gauge */
+		Enable( STATUS );
+		Disable( DIALOGCACHE );
+											/* Transfer files to the target
+												system */
+		PerformFileTransfer( szFileSet );
+
+	#ifdef(WIN32S)
+		DoWin32sInstall:
+
+			if (boolInstallWin32s) then
+
+				SetDialogTitle( DLG_MSG_INFORMATION, "Win32s installation" );
+				szMsg = "Pueblo uses Win32s to run under Windows 3.1, " +
+						"When you press 'Ok', the installation program will install " +
+						"Win32s 1.30 for you.\n\n" +
+						"When you finish installing Win32s, the Pueblo setup will continue.";
+
+				MessageBox( szMsg, INFORMATION );
+		   		InstallWin32s();
+
+			endif;
+	#endif
+
+
+	DoInstall3DEngine:
+		if (boolInstallRL) then
+			SetStatusWindow( -1, "Setting up to install Microsoft Reality Lab..." );
+			InstallRL();
+		endif;
+
+	SetRegistryEntries:
+		SetStatusWindow( -1, "Registering Pueblo..." );
+
+		CreateRegDBEntries( );
+											/* Set up progress indicator and
+												information gauge */
+		SetStatusWindow( 95, "Creating Program Folder and Icons...." );
+
+											// Create program folder and icons
+	CreateProgramIcons:
+
+		if (IS_WINDOWSNT = nOSVersion) then
+											/* Make sure that folder is personal,
+												we don't want to get anyone into
+												trouble :-) */
+			ProgDefGroupType( PERSONAL );
+		endif;
+
+		if (IS_WIN32S = nOSVersion || IS_WINDOWS = nOSVersion) then
+			AppCommand( PROGMAN, CMD_RESTORE );
+			CreateProgramFolder( svFolder );
+			ShowProgramFolder( svFolder, 0 );
+			LongPathToShortPath( svTarget );
+		else
+			CreateProgramFolder( svFolder );
+			ShowProgramFolder( svFolder, 0 );
+		endif;
+		Delay( 1 );
+
+		TARGETDIR = svTarget;
+
+		if ((IS_WINDOWSNT = nOSVersion) || (nOSVersion = IS_WINDOWS) 
+				|| (nOSVersion = IS_WIN32S)) then
+			svPath = svProgram;
+			LongPathToQuote( svPath, TRUE );
+			AddFolderIcon( svFolder, APP_NAME, svPath, TARGETDIR, "",
+							0, "", REPLACE );
+		elseif (IS_WINDOWS95 = nOSVersion) then
+			svPath = svProgram;
+			LongPathToQuote( svPath, TRUE );
+			AddFolderIcon( svFolder, APP_NAME, svPath, TARGETDIR, "",
+							0, "", REPLACE );
+		endif;
+
+		Delay( 1 );
+											// Install help item
+
+		if ((nOSVersion = IS_WINDOWS) 
+				|| (nOSVersion = IS_WIN32S) ||(IS_WINDOWSNT = nOSVersion) ) then
+
+			svPath = "WinHlp32.exe " + TARGETDIR ^ "Pueblo.hlp";
+
+			AddFolderIcon( svFolder, "Pueblo Help",
+							svPath, TARGETDIR, "", 0, "", REPLACE );
+		elseif (IS_WINDOWS95 = nOSVersion) then
+			szTemp = TARGETDIR ^ "Pueblo.hlp";
+//			LongPathToQuote( szTemp, TRUE );		// This doesn't work!
+			svPath = "WinHlp32.exe " + szTemp;
+
+			AddFolderIcon( svFolder, "Pueblo Help", svPath, TARGETDIR, "",
+							0, "", REPLACE );
+		endif;
+	
+		Delay( 1 );
+											// Install ReadMe item
+
+		if ((IS_WINDOWSNT = nOSVersion) || (nOSVersion = IS_WINDOWS) 
+				|| (nOSVersion = IS_WIN32S)) then
+			svPath = "Write.exe " + TARGETDIR ^ "ReadMe.wri";
+			AddFolderIcon( svFolder, "Pueblo release notes",
+							svPath, TARGETDIR, "", 0, "", REPLACE );
+		elseif (IS_WINDOWS95 = nOSVersion) then
+			szTemp = TARGETDIR ^ "ReadMe.wri";
+			LongPathToQuote( szTemp, TRUE );
+			svPath = "Write.exe " + szTemp;
+
+			AddFolderIcon( svFolder, "Pueblo release notes", svPath,
+							TARGETDIR, "", 0, "", REPLACE );
+		endif;
+	
+		Delay( 1 );
+											// Install Uninstall item
+		svPath = UNINST;
+		LongPathToShortPath( svPath );
+		LongPathToShortPath( svUninstLogFile );
+		svPath = svPath + " -f" + svUninstLogFile;
+		AddFolderIcon( svFolder, "Uninstall Pueblo", svPath,
+						WINDIR, "", 0, "", REPLACE );
+		Delay( 1 );
+											/* Announce setup complete and
+												offer to read README file */
+	CloseOfInstall:
+		SetStatusWindow( 100, "Installation complete." );
+		Delay( 1 );
+
+		SetupFinish();
+
+		exit;
+
+
+/*----------------------------------------------------------------------------
+	SetupScreen
+
+	This function will set up the screen look.  This includes colors, fonts,
+	text to be displayed, etc.
+----------------------------------------------------------------------------*/
+
+function SetupScreen()
+		string	szBitmap;
+		number	nvDx, nvDy, nDxBillboard, nDyBillboard;
+begin
+	GetExtents( nvDx, nvDy );
+
+	Enable( FULLWINDOWMODE );
+	Enable( INDVFILESTATUS );
+	Enable( BITMAP256COLORS );
+
+	SetColor( BACKGROUND, INSTALL_BACKGROUND );	// Dark red background
+	SetTitle( "Setup", 0, BACKGROUNDCAPTION );	// Caption bar text
+
+	Enable( BACKGROUND );
+
+											// Show the bitmap.
+	Enable( BITMAPFADE );
+
+	#ifdef( WIN32 )
+		if (nOSVersion = IS_WINDOWSNT) then
+			PlaceBitmap( SUPPORTDIR ^ "TITLENT.BMP",
+							1, 10, 10, UPPER_LEFT | BITMAPICON );
+		else
+			PlaceBitmap( SUPPORTDIR ^ "TITLE95.BMP",
+							1, 10, 10, UPPER_LEFT | BITMAPICON );
+		endif;
+	#else
+		PlaceBitmap( SUPPORTDIR ^ "TITLE31.BMP",
+						1, 10, 10, UPPER_LEFT | BITMAPICON );
+	#endif
+
+	Disable( BITMAPFADE );
+end;
+
+
+/*----------------------------------------------------------------------------
+	CheckRequirements
+
+	This function will check all minimum requirements for the application
+	being installed.  If any fail, then the user is informed and the
+	installation is terminated.
+----------------------------------------------------------------------------*/
+
+function CheckRequirements()
+		number  nvDx, nvDy;
+		number  nvResult;
+begin
+											// Check screen resolution
+	GetExtents( nvDx, nvDy );
+
+	if (nvDy < 480) then
+		SetDialogTitle( DLG_MSG_WARNING, "Get a better video card!" );
+		MessageBox( "This program requires VGA or better resolution.",
+					WARNING );
+		exit;
+	endif;
+end;
+
+
+/*----------------------------------------------------------------------------
+	GetBrowserDirectories
+
+	This function will attempt to find the directories for Web browsers
+	that the install script knows about.
+----------------------------------------------------------------------------*/
+
+function GetBrowserDirectories()
+	STRING		strEntry;
+	STRING		strSub;
+	NUMBER		nSize;
+begin
+	boolFoundNavigator = FALSE;
+	svNavigatorDir = "";
+
+	if (RegDBGetKeyValueEx( "\\NetscapeMarkup\\shell\\open\\command",
+								"", nType, strEntry, nSize ) = 0) then
+
+										// Strip the executeable name
+		strSub = "Netscape.exe";
+		nPos = StrFind( strEntry, strSub );
+		StrSub( strSub, strEntry, 0, nPos );
+		svNavigatorDir = strSub;
+//		svNavigatorDir  = svNavigatorDir ^ "plugins";
+
+		boolFoundNavigator = TRUE;
+	endif;
+end;
+
+
+/*----------------------------------------------------------------------------
+	AskWhichBrowsers
+
+	This function will ask the installing user which found browsers
+	should have Pueblo installed.
+----------------------------------------------------------------------------*/
+
+function AskWhichBrowsers()
+	NUMBER		nResult;
+	NUMBER		nAskResult;
+	STRING		szMsg1;
+	STRING		szMsg2;
+	STRING		szComponents;
+	STRING		svEntry;
+begin
+	nAskResult = YES;
+
+	szMsg1 = "Select the browser(s) where Pueblo should be installed as the " +
+				"default telnet application:";
+	szMsg2 = "Making Pueblo the default telnet application will enable " +
+				"you to click on 'telnet://' anchors on the world-wide web " +
+				"(such as those in MUD lists), and have Pueblo " +
+				"automatically connect you to the selected site.\n" +
+				"\n" +
+				"(Press the Next button to continue.)";
+
+	szComponents = "Browsers";
+	if (boolFoundNavigator) then
+		ComponentAddItem( szComponents, "Netscape Navigator", 1024, TRUE );
+	endif;
+
+	nResult = SdAskOptions( "Install as telnet helper?", szMsg1, szMsg2,
+							"", szComponents, NONEXCLUSIVE );
+
+	RegDBSetDefaultRoot( HKEY_CURRENT_USER );
+	svEntry = svTarget ^ "Pueblo.exe";
+
+	if (boolFoundNavigator) then
+		if (ComponentIsItemSelected( szComponents,
+										"Netscape Navigator" )) then
+			RegDBSetKeyValueEx( "\\Software\\Netscape\\Netscape Navigator\\Viewers",
+								"Telnet", REGDB_STRING, svProgram, -1 );
+		endif;
+	endif;
+												/* Restore the default root */
+	RegDBSetDefaultRoot( HKEY_CLASSES_ROOT );
+
+	return nResult;
+end;
+
+
+/*----------------------------------------------------------------------------
+	SetupFileTransfer
+
+	This function defines the file set based on the user's choices of
+	components, then it performs the file set.
+----------------------------------------------------------------------------*/
+
+function SetupFileTransfer( szComponentList, szFileSet )
+	number	svVersionNumber;
+begin
+											// Define the file set
+	TARGETDIR = svTarget;
+
+	FileSetBeginDefine( szFileSet );
+											/* Always include README files,
+												located at the root of the
+												DATA.Z library file */
+
+	SetStatusWindow( -1, "Copying readme files..." );
+	TARGETDIR = svTarget;
+	CompressGet( "data.z", "*.*", COMP_NORMAL );
+
+	SetStatusWindow( -1, "Copying program files..." );
+
+	CompressGet( "data.z", "program\\*.*", INCLUDE_SUBDIR );
+
+	SetStatusWindow( -1, "Copying help files..." );
+
+	CompressGet( "data.z", "help\\*.*", INCLUDE_SUBDIR );
+
+	#ifdef( WIN32S )
+
+		if (boolInstallWin32s && ((nOSVersion = IS_WINDOWS) || (nOSVersion = IS_WIN32S))) then
+
+			SetStatusWindow( -1, "Copying Win32s files..." );
+			TARGETDIR = SUPPORTDIR ^ "Win32s";
+
+			CompressGet( "data.z", "win32s\\*.*", INCLUDE_SUBDIR );
+		endif;
+	#endif
+
+	if (boolInstallRL) then
+
+		SetStatusWindow( -1, "Copying Microsoft Reality Lab files..." );
+
+		TARGETDIR = SUPPORTDIR;
+		nResult = CompressGet( "data.z", "rl\\*.*", COMP_NORMAL );
+
+		if (nResult < 0) then
+			SetDialogTitle( DLG_MSG_WARNING, "Corrupt installation?" );
+			szMsg = "There was a problem copying Reality Lab files.  " +
+					"Most probably the installer is corrupted.";
+			MessageBox( szMsg, WARNING );
+		endif;
+	endif;
+											/* Copy the shared files to the
+												system directory */
+
+	SetStatusWindow( -1, "Copying shared files..." );
+
+	TARGETDIR = WINSYSDIR;
+	CompressGet( "data.z", "shared\\common\\*.*", COMP_UPDATE_DATE | SHAREDFILE );
+
+	#ifdef(WIN16)
+		CompressGet( "data.z", "shared\\win16\\*.*", COMP_UPDATE_DATE | SHAREDFILE );
+	#else
+		CompressGet( "data.z", "shared\\win32\\*.*", COMP_UPDATE_DATE | SHAREDFILE );
+	#endif
+
+	#ifdef( VOXWARE )
+		TARGETDIR = WINSYSDIR;
+		SetStatusWindow( -1, "Copying Voxware files..." );
+		CompressGet( "data.z", "tnt\\*.DLL", COMP_UPDATE_DATE | SHAREDFILE );
+
+		TARGETDIR = svTarget;
+		CompressGet( "data.z", "tnt\\*.WAV", COMP_NORMAL );
+	#endif
+
+	FileSetEndDefine( szFileSet );
+end;
+
+
+/*----------------------------------------------------------------------------
+	ConstructInfoList
+
+	This function will construct a info list for showing the SdStartCopy
+	dialog to confirm the file transfer operation.
+----------------------------------------------------------------------------*/
+
+function ConstructInfoList( listInfo )
+		STRING szItem;
+begin
+	ListAddString( listInfo, "Target Directory", AFTER );
+	ListAddString( listInfo, STR_DEFTAB + svTarget, AFTER );
+
+	ListAddString( listInfo, "", AFTER );
+	ListAddString( listInfo, "Program Folder", AFTER );
+	ListAddString( listInfo, STR_DEFTAB + svFolder, AFTER );
+end;
+
+
+/*----------------------------------------------------------------------------
+	CreateRegDBEntries
+
+	This function will create necessary keys and values for the sample
+	program.
+----------------------------------------------------------------------------*/
+
+function CreateRegDBEntries()
+	string szKey[255], szDemo, szEmpty;
+	NUMBER nSize;
+begin
+	   										/* Delete the product ID so that
+	   											time bomb will work */
+
+	if ((nOSVersion = IS_WINDOWS) || (nOSVersion = IS_WIN32S)) then
+
+		szKey = COMPANY_NAME + "//" + PRODUCT_NAME + "//" +
+					GENERAL_GROUP;
+		szEmpty = "";
+		WriteProfString( "Pueblo.ini" , szKey, szEmpty, szEmpty );
+	else
+											// Remove the general group
+		RegDBSetDefaultRoot( HKEY_CURRENT_USER );
+		szKey = "SOFTWARE\\" + COMPANY_NAME + "\\" + PRODUCT_NAME + "\\" +
+					GENERAL_GROUP;
+	 	RegDBDeleteKey( szKey );
+	endif;
+
+	if ((nOSVersion = IS_WINDOWS) || (nOSVersion = IS_WIN32S)) then
+	
+		szKey = COMPANY_NAME + "//" + PRODUCT_NAME + "//" +
+					CH_CONNECTION_GROUP;
+		WriteProfString( "Pueblo.ini" , szKey, CH_CONNECTION_HOST, 	CH_CONNECTION_HOST_DEF );
+		WriteProfString( "Pueblo.ini" , szKey, CH_CONNECTION_PORT, 	CH_CONNECTION_PORT_DEF );
+	else
+		RegDBSetDefaultRoot( HKEY_CURRENT_USER );
+
+												// Create CH_CONNECTION_GROUP key
+
+		szKey = "SOFTWARE\\" + COMPANY_NAME + "\\" + PRODUCT_NAME + "\\" +
+					CH_CONNECTION_GROUP;
+		RegDBCreateKeyEx( szKey, "" );
+
+		RegDBSetKeyValueEx( szKey, CH_CONNECTION_HOST, REGDB_STRING,
+							CH_CONNECTION_HOST_DEF, -1 );
+		RegDBSetKeyValueEx( szKey, CH_CONNECTION_PORT,  REGDB_NUMBER,
+							CH_CONNECTION_PORT_DEF, -1 );
+
+							
+		RegDBSetDefaultRoot( HKEY_LOCAL_MACHINE );
+												// Create PRODUCT_KEY key.
+
+		szKey = "SOFTWARE\\" + COMPANY_NAME + "\\" + PRODUCT_NAME + "\\" +
+					PRODUCT_VERSION + "\\" + "path";
+		RegDBCreateKeyEx( szKey, "" );
+		RegDBSetKeyValueEx( szKey, "main", REGDB_STRING, svTarget, -1 );
+		RegDBSetKeyValueEx( szKey, "HelpFiles", REGDB_STRING, svTarget, -1 );
+	endif;
+end;
+
+
+/*----------------------------------------------------------------------------
+	InstallRL
+
+	This function will install Microsoft Reality lab.
+----------------------------------------------------------------------------*/
+
+function InstallRL()
+		STRING	szMsg;
+begin										/* We install Reality Lab by
+												calling the Reality Lab
+												InstallShield script */
+
+	Disable( STATUS );
+	SetDialogTitle( DLG_MSG_INFORMATION, "Reality Lab installation" );
+	szMsg = "Pueblo uses Microsoft's Reality Lab rendering engine to " +
+			"render 3D, walk-through images using Virtual Reality " +
+			"Modeling Language.\n\n" +
+			"When you press 'Ok', the Reality Lab libraries will be " +
+			"installed.";
+	MessageBox( szMsg, INFORMATION );
+
+	szMsg = "Please wait a moment while the Microsoft Reality Lab " +
+			"installer initializes...";
+	SdShowMsg( szMsg, TRUE );
+
+	szScript = SUPPORTDIR ^ "rl.ins";
+	if (DoInstall( szScript, "", WAIT ) != 1) then
+		SetDialogTitle( DLG_MSG_WARNING, "Reality Lab installation error" );
+		szMsg = "There was a problem running the Microsoft's Reality Lab installer " +
+				"script.  Pueblo may still work, but you probably won't see 3d graphics.";
+		MessageBox( szMsg, WARNING );
+	endif;
+
+	SdShowMsg( "", FALSE );
+end;
+
+
+#ifdef(WIN32S)
+
+/*----------------------------------------------------------------------------
+	InstallWin32s
+
+	This function will install Win32s.
+----------------------------------------------------------------------------*/
+
+function InstallWin32s()
+		STRING	szMsg, svPath;
+begin            
+
+	svPath = SUPPORTDIR ^ "win32s\\disk1\\setup.exe";
+
+	if (LaunchAppAndWait( svPath, "", WAIT ) != 1) then
+		SetDialogTitle( DLG_MSG_WARNING, "Win32s installation error" );
+		szMsg = "There was a problem running the Microsoft Win32s setup " +
+				"application.  Pueblo will most likely not work.";
+		MessageBox( szMsg, WARNING );
+	endif;
+	svPath = SUPPORTDIR ^ "win32s";
+end;
+#endif
+
+
+
+/*----------------------------------------------------------------------------
+	PerformFileTransfer
+
+	This function will perform the file transfer and handle any error that
+	may occur during the file transfer.
+----------------------------------------------------------------------------*/
+
+function PerformFileTransfer( szFileSet )
+STRING		svTempDir;
+STRING		szMessage;
+begin
+	StatusUpdate( ON, 90 );
+											// Perform the file set
+
+	nResult = FileSetPerformEz( szFileSet, 0 );
+
+	switch (nResult)
+		case FS_DONE:						// Successful completion
+
+		case FS_CREATEDIR:					// Create directory error
+
+			SetDialogTitle( DLG_MSG_SEVERE, "Aiiiieeeeee!!!" );
+			MessageBox( "Unable to create a directory under " +
+							TARGETDIR + ".\n" +
+							"Please check write access to this directory.",
+							SEVERE );
+			exit;
+
+		default:							/* Group all other errors under
+												default label */
+			NumToStr( szTemp, nResult );
+			SetDialogTitle( DLG_MSG_SEVERE, "Aiiiieeeeee!!!" );
+			GetEnvVar( "TEMP", svTempDir );
+			szMessage = "Darn!  The installer got a file transfer " +
+						"error.  This is often caused by having a " +
+						"conflicting file in your TEMP directory (" +
+						svTempDir + ").  Try cleaning out " +
+						"this directory and try again.\n\n" +
+						"Error Number: " + szTemp;
+
+			MessageBox( szMessage, SEVERE );
+			exit;
+	endswitch;
+end;
+
+
+/*----------------------------------------------------------------------------
+	SetupFinish
+
+	This function will construct messages and info for showing SdFinish
+----------------------------------------------------------------------------*/
+
+function SetupFinish()
+	string	szMsg1, szMsg2;
+	string	szReadme, szApp, svPath, szParam;
+	BOOL	boolReadme, boolApp, boolSharedChange;
+	BOOL	bContinue;
+	STRING	svNewMfcVer, svNewMfcNVer, svNewMsvc20Ver, svNewComCtl32Ver;
+begin
+	GetSystemFileVersions( svNewMfcVer, svNewMfcNVer, svNewMsvc20Ver,
+							svNewComCtl32Ver );
+
+	boolSharedChange =
+		(VerCompare( svNewMfcVer, svMfcVer, VERSION ) = GREATER_THAN) ||
+		(VerCompare( svNewMfcNVer, svMfcNVer, VERSION ) = GREATER_THAN) ||
+		(VerCompare( svNewMsvc20Ver, svMsvc20Ver, VERSION ) = GREATER_THAN) ||
+		(VerCompare( svNewComCtl32Ver, svComCtl32Ver, VERSION ) = GREATER_THAN);
+
+	if ((BATCH_INSTALL = TRUE) && boolSharedChange) then
+		szMsg = "Some files could not be installed because they are " +
+				"currently in use by other programs in the system.  " +
+				"Pueblo should run fine, but if you have problems, then " +
+				"rebooting should fix the problem.";
+		CommitSharedFiles( 0 );
+		if (0 = RebootDialog( "Restart Windows", szMsg, SYS_BOOTMACHINE )) then
+			bContinue = TRUE;
+		else
+			bContinue = FALSE;
+		endif;
+	else
+		bContinue = TRUE;
+	endif;
+
+	if (bContinue) then
+		boolReadme = FALSE;
+		boolApp    = FALSE;
+
+		if (IS_WINDOWSNT = nOSVersion || (nOSVersion = IS_WINDOWS) || 
+					(nOSVersion = IS_WIN32S) ) then
+			szMsg1 = "Setup is complete.  You may run Pueblo by " +
+						"double-clicking on the installed program " +
+						"icon.\n";
+		elseif (IS_WINDOWS95 = nOSVersion) then
+			szMsg1 = "Setup is complete.  You may run Pueblo by " +
+						"first opening the Start menu, then selecting the " +
+						"Pueblo folder, and the clicking on the Pueblo " +
+						"item.\n";
+		endif;
+
+		szMsg1 = szMsg1 + "\nPlease view the contents of the 'ReadMe' " +
+							"file before starting the program";
+
+		szMsg2 = "Click Finish to complete Setup.";
+
+		boolReadme = TRUE;
+		szReadme = "Yes, I want to view the ReadMe file now.";
+
+		szApp = "Yes, I want to run Pueblo now.";
+
+		MessageBeep( 0 );
+
+		#ifdef(WIN32S)
+			if (boolInstallWin32s && ((nOSVersion = IS_WINDOWS) || (nOSVersion = IS_WIN32S)) ) then
+				szMsg2 = "Remove any disks from the drives, and then click Finish to complete Setup.";
+
+				svPath = SUPPORTDIR ^ "win32s";
+				DeleteDir( svPath, ALLCONTENTS );
+
+				SdFinishReboot( "", szMsg1, SYS_BOOTWIN, szMsg2, 0 );
+			else
+				SdFinish( "", szMsg1, szMsg2, szReadme, szApp, boolReadme, boolApp );
+			endif;
+		#else
+			SdFinish( "", szMsg1, szMsg2, szReadme, szApp, boolReadme, boolApp );
+		#endif
+
+		if (boolReadme) then
+			svPath = "Write.exe";
+			szParam   = svTarget ^ "ReadMe.wri";
+			LongPathToShortPath( szParam );
+			LaunchAppAndWait( svPath + " " + szParam, "", NOWAIT );
+			Delay(2);
+		endif;
+
+		if (boolApp) then
+			LaunchAppAndWait( svProgram, "", NOWAIT );
+		endif;
+	endif;
+end;
+
+
+/*----------------------------------------------------------------------------
+	GetSystemFileVersions
+
+	This function will get the version numbers of system files.
+----------------------------------------------------------------------------*/
+
+function GetSystemFileVersions( svMfc, svMfcN, svMsvcRT, svComCtl32 )
+	string	szDir;
+begin
+	szDir = WINSYSDIR;
+
+	VerGetFileVersion( szDir ^ "mfc30.dll", svMfc );
+	VerGetFileVersion( szDir ^ "mfcn30.dll", svMfcN );
+	VerGetFileVersion( szDir ^ "msvcrt20.dll", svMsvcRT );
+	VerGetFileVersion( szDir ^ "comctl32.dll", svComCtl32 );
+end;
+
+
+/*----------------------------------------------------------------------------
+	Standard dialogs include
+----------------------------------------------------------------------------*/
+
+#include "sddialog.rul"
+

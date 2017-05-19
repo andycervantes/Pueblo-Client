@@ -1,0 +1,52 @@
+Pueblo 2.20
+
+September 5th, 1996
+
+Pueblo is a network game system that brings you together with other fun-loving folks on the internet.  We think if we bring different cultures, ages, and backgrounds together on the internet, we can make the world a much nicer place.
+
+Thanks for helping bring the world together!  Have fun!
+
+The Pueblo Development Team
+
+Pritham Shetty
+Ron Lussier (Coyote)
+Dan Greening (Pingbot)
+Jim Doubek
+Glenn Crocker (Wizard)
+
+
+New In This Release
+
+The biggest addition to this release is support for voice!
+
+INSTALLING PUEBLO
+
+Pueblo is distributed on the Internet as a self-extracting executable.  Note that there are two versions of Pueblo.  The 16-bit version works on Windows 3.1, white the 32-bit version works with Windows 95 and Windows NT.  You should install the correct version for your platform.
+
+To install Pueblo, simply run the executable.  The program will first ask you if you wish to install.  If you say 'yes', you will then be lead through an install wizard.  You'll be asked a series of fairly typical install questions, and finally Pueblo will happily install itself.
+
+
+USING PUEBLO
+
+Once Pueblo is extracted, you can run it from the Program Manager, File Manager or the Start menu (on Windows95.)  The program name is 'Pueblo.exe'.  (On Windows NT or Windows95, you can run Pueblo from the command line.)
+
+Pueblo will ask you to agree to our beta agreement.  If you press 'Accept', the program will run.  (If you don't accept you can't use the program.  Sorry.  The lawyers made us do it.  ;-)  You'll only be asked this once for each version of the program you use.
+
+After accepting the Pueblo license agreement, Pueblo will appear and show you your personal world list.  Unless you've used Pueblo before, your personal world list will be empty.  No worries!  You can click on the 'Edit' hotlink to add your favorite worlds to the list.  If you're not a veteran mudder, then you can click on the 'Chaco world list' hotlink to browse our categorized list of hundreds of worlds.
+
+Please		If you think of a neat feature you'd like to see in Pueblo, or find a bug, use the 'Submit Bug Report' entry under the 'Help' menu to send us a note about it!  You can also send email "by hand" to pueblo-support@chaco.com.
+
+
+Known Bugs
+
+·	There are no significant known bugs at this time.  Let us know if you find any!
+
+
+Known Problems
+
+·	Pueblo graphics are optimized for displays with 256 or more colors, so using 16-color mode may be less than optimal.
+
+
+ONCE YOU'RE ONLINE
+
+Pueblo uses a hypertext interface.  Select one of the highlighted words to jump to that world or category of worlds.  When you select a world, you will be connected to that world if it is available.

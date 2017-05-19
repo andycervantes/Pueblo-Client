@@ -1,0 +1,1 @@
+nmake /f msw.mak BLDCFG="Win32 Release"

@@ -1,0 +1,227 @@
+/*----------------------------------------------------------------------------
+
+            .###.  ###     ###       ,#,          .###.    ,#######,
+         ,####""   ###    .###     ,##'##,     ,####""   .##'    `##.
+        ###        ###########    ,##' `##,   ###       ####      ####
+        ###..      ###'    ###  ,###########, ####..    `###,    ,##'
+          `######  ###     ###  `##'     `##'   `######   `########'
+
+
+	Copyright 1995, Chaco Communications, Inc. All rights reserved.
+	Unpublished -- Rights reserved under the copyright laws of the United
+	States.  Use of a copyright notice is precautionary only and does no
+	imply publication or disclosure.
+
+	This software contains confidential information and trade secrets of
+	Chaco Communications, Inc.  Use, disclosure, or reproduction is
+	prohibited without the prior express written permission of Chaco
+	Communications, Inc.
+
+	RESTRICTED RIGHTS LEGEND
+
+	Use, duplication, or disclosure by the Government is subject to
+	restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+	Technical Data and Computer Software clause at DFARS 252.227-7013.
+
+	Chaco Communications, Inc.
+	10164 Parkwood Drive, Suite 8, Cupertino, CA, 95014-1533
+
+------------------------------------------------------------------------------
+
+	Header file for the ChTNT object, which manages the interface between
+	TNT and the Sound Module.
+
+----------------------------------------------------------------------------*/
+
+
+#if !defined( _CHTNT_H )
+#define _CHTNT_H
+
+#if defined( CH_USE_VOXWARE )
+
+#define VOXWARE_WIN32
+#include <tnt.h>
+
+
+/*----------------------------------------------------------------------------
+	Constants
+----------------------------------------------------------------------------*/
+
+#define SESSION_LIMIT		5
+
+
+/*----------------------------------------------------------------------------
+	ChTNTSession class
+----------------------------------------------------------------------------*/
+
+class ChTNTSession
+{
+	public:
+		ChTNTSession();
+		~ChTNTSession();
+
+	public:
+		inline const string& GetId() { return m_strCallId; }
+		inline TNT_SESSION_HANDLE GetSessionHdl() { return m_hSession; }
+		inline chflag32 GetOptions() { return m_flOptions; }
+
+		inline void Set( TNT_SESSION_HANDLE hSession,
+							const string& strCallId,
+							chflag32 flOptions )
+					{
+						m_strCallId = strCallId;
+						m_hSession = hSession;
+						m_flOptions = flOptions;
+					}
+		inline void SetSessionHdl( TNT_SESSION_HANDLE hSession )
+					{
+						m_hSession = hSession;
+					}
+
+	protected:
+		string						m_strCallId;
+		TNT_SESSION_HANDLE			m_hSession;
+		chflag32					m_flOptions;
+};
+
+
+/*----------------------------------------------------------------------------
+	ChTNTSessionMgr class
+----------------------------------------------------------------------------*/
+
+class ChTNTSessionMgr
+{
+	public:
+		ChTNTSessionMgr();
+		~ChTNTSessionMgr();
+
+	public:
+		inline bool AllSessionsInUse()
+						{
+							return (SESSION_LIMIT <= GetSessionCount());
+						}
+
+		bool Set( const string& strCallId, TNT_SESSION_HANDLE hSession,
+					chflag32 flOptions );
+
+		TNT_SESSION_HANDLE GetSessionHandle( const string& strCallId,
+												chflag32* pflOptions = 0 );
+		bool Hangup( TNT_HANDLE hTNT, const string& strCallId );
+		bool ClearSession( const string& strCallId );
+		bool ClearSessionHdl( TNT_SESSION_HANDLE hSession );
+
+		ChTNTSession* Find( const string& strCallId )
+						{
+							return Find( strCallId, 0 );
+						}
+		ChTNTSession* Find( TNT_SESSION_HANDLE hSession )
+						{
+							return Find( hSession, 0 );
+						}
+
+	protected:
+		inline bool IsInUse( int iSession )
+						{
+							return m_boolSessionInUse[iSession];
+						}
+		inline void SetInUse( int iSession, bool boolInUse = true )
+						{
+							if (IsInUse( iSession ) && !boolInUse)
+							{
+								++m_iSessions;
+							}
+							else if (!IsInUse( iSession ) && boolInUse)
+							{
+								--m_iSessions;
+							}
+
+							m_boolSessionInUse[iSession] = boolInUse;
+						}
+		inline ChTNTSession* GetSession( int iSession )
+						{
+							return &m_sessionList[iSession];
+						}
+
+		ChTNTSession* Find( const string& strCallId, int* piLoc );
+		ChTNTSession* Find( TNT_SESSION_HANDLE hSession, int* piLoc );
+
+		inline int GetSessionCount() { return m_iSessions; }
+
+		bool Hangup( TNT_HANDLE hTNT, TNT_SESSION_HANDLE hSession );
+
+	protected:
+		int				m_iSessions;
+
+		ChTNTSession	m_sessionList[SESSION_LIMIT];
+		bool			m_boolSessionInUse[SESSION_LIMIT];
+};
+
+
+/*----------------------------------------------------------------------------
+	ChTNT class
+----------------------------------------------------------------------------*/
+
+class ChTNT
+{
+	public:
+		ChTNT();
+		~ChTNT();
+
+		static chuint16 GetTNTPort() { return m_suTNTPort; }
+
+		static ChTNT* GetTNT() { return m_this; }
+
+		static bool MakeCall( const string& strCallId, const string& strHost,
+								chuint16 suPort, chflag32 flOptions,
+								chflag32 flRemoteOptions );
+		static bool Hangup( const string& strCallId );
+
+		static void SetMikeSensitivity( chuint32 luValue );
+		static void SetMikeVolume( chuint32 luValue );
+
+		static void UpdatePrefs();
+
+	protected:
+		static TNT_HANDLE GetTNTHandle() { return m_hTNT; }
+		static const string& GetTNTLocalHost() { return m_strTNTLocalHost; }
+		static chuint32 GetMikeVolume() { return m_luMikeVolume; }
+		static chuint32 GetMikeSensitivity() { return m_luMikeSensitivity; }
+		static bool IsRejectingCalls() { return m_boolRejectCalls; }
+
+		static void SetTNTPort( chuint16 suPort )
+						{
+							m_suTNTPort = suPort;
+						}
+		static void SetTNTLocalHost( const char* pstrLocalHost )
+						{
+							m_strTNTLocalHost = pstrLocalHost;
+						}
+
+		static TNT_RETCODE TNT_FAR TNT_PASCAL TNT_LOADDS
+			NotifyProc( TNT_HANDLE hTNT, unsigned short wMessage,
+						TNT_TRANSACTION_HANDLE hTransaction,
+	    				unsigned long dwParam1, unsigned long dwParam2,
+	    				TNT_USER_HANDLE hUser );
+
+	protected:
+		static ChTNT*			m_this;
+		static int				m_iUsage;
+
+		static TNT_HANDLE		m_hTNT;
+		static chuint16			m_suTNTPort;
+		static string			m_strTNTLocalHost;
+
+		static ChTNTSessionMgr		m_tntSessions;
+
+		static TNT_USER_INFO		m_userInfo;
+
+											// User preferences...
+
+		static chuint32				m_luMikeVolume;
+		static chuint32				m_luMikeSensitivity;
+		static bool					m_boolRejectCalls;
+};
+
+
+#endif	// defined( CH_USE_VOXWARE )
+#endif	// !defined( _CHTNT_H )

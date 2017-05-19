@@ -1,0 +1,58 @@
+[ uuid(41453471-3850-11CE-8193-0020AF18F905), version(1.0) ]
+library netscape
+{
+    //  For the Windows 16 bit Version of Netscape, the following line should be
+    //  importlib("stdole.tlb");
+        importlib("stdole32.tlb");
+        
+        [ uuid(EF5F7051-385A-11CE-8193-0020AF18F905) ]
+        dispinterface INetwork
+        {
+                properties:
+                        [id(1)] BSTR Username;
+                        [id(2)] BSTR Password;
+                        [id(3)] boolean FlagShowAllNews;
+                        [id(4)] boolean FlagFancyFTP;
+                        [id(5)] boolean FlagFancyNews;
+                        
+                methods:
+                        [id(6)] void Close();
+                        [id(7)] short Read(BSTR* pBuffer, short iAmount);
+                        [id(8)] long GetStatus();
+                        [id(9)] boolean Open(BSTR pURL, short iMethod, BSTR pPostData, long lPostDataSize, BSTR pPostHeaders);
+                        [id(10)] BSTR GetErrorMessage();
+                        [id(11)] short GetServerStatus();
+                        [id(12)] long GetContentLength();
+                        [id(13)] BSTR GetContentType();
+                        [id(14)] BSTR GetContentEncoding();
+                        [id(15)] BSTR GetExpires();
+                        [id(16)] BSTR GetLastModified();
+                        [id(17)] BSTR Resolve(BSTR pBase, BSTR pRelative);
+                        [id(18)] boolean IsFinished();
+                        [id(19)] short BytesReady();
+        };
+
+        [ uuid(EF5F7050-385A-11CE-8193-0020AF18F905) ]
+        coclass CNetwork
+        {
+                [default] dispinterface INetwork;
+        };
+
+        
+        [ uuid(E67D6A11-4438-11CE-8CE4-0020AF18F905) ]
+        dispinterface IOleRegistry
+        {
+                properties:
+                        
+                methods:
+                        [id(1)] boolean RegisterViewer(BSTR pMimeType, BSTR pRegistryName);
+                        [id(2)] boolean RegisterProtocol(BSTR pProtocol, BSTR pRegistryName);
+        };
+
+        [ uuid(E67D6A10-4438-11CE-8CE4-0020AF18F905) ]
+        coclass COleRegistry
+        {
+                [default] dispinterface IOleRegistry;
+        };
+};
+

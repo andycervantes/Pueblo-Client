@@ -1,0 +1,938 @@
+/*----------------------------------------------------------------------------
+@emit/html <img xch_speech=call host="204.139.15.66:12380" id=testing123>
+
+            .###.  ###     ###       ,#,          .###.    ,#######,
+         ,####""   ###    .###     ,##'##,     ,####""   .##'    `##.
+        ###        ###########    ,##' `##,   ###       ####      ####
+        ###..      ###'    ###  ,###########, ####..    `###,    ,##'
+          `######  ###     ###  `##'     `##'   `######   `########'
+
+
+	Copyright 1995, Chaco Communications, Inc. All rights reserved.
+	Unpublished -- Rights reserved under the copyright laws of the United
+	States.  Use of a copyright notice is precautionary only and does no
+	imply publication or disclosure.
+
+	This software contains confidential information and trade secrets of
+	Chaco Communications, Inc.  Use, disclosure, or reproduction is
+	prohibited without the prior express written permission of Chaco
+	Communications, Inc.
+
+	RESTRICTED RIGHTS LEGEND
+
+	Use, duplication, or disclosure by the Government is subject to
+	restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+	Technical Data and Computer Software clause at DFARS 252.227-7013.
+
+	Chaco Communications, Inc.
+	10164 Parkwood Drive, Suite 8, Cupertino, CA, 95014-1533
+
+------------------------------------------------------------------------------
+
+	Implementation of the ChTNT object, which manages the interface between
+	TNT and the Sound Module.
+
+----------------------------------------------------------------------------*/
+
+// $Header: /home/cvs/chaco/modules/client/msw/ChSound/ChVAPI.cpp.old,v 1.5 1996/09/26 17:22:48 coyote Exp $
+
+#include "headers.h"
+
+#if defined( CH_USE_VOXWARE )
+
+#include <ChReg.h>
+
+#include "ChSpeechPrefs.h"
+#include "ChTNT.h"
+
+
+/*----------------------------------------------------------------------------
+	Constants
+----------------------------------------------------------------------------*/
+
+#define DEF_TNT_PORT		12380
+											/* This should be set to zero
+												if Voxware ever fixes the
+												problem of returning the
+												correct port number */
+#define TNT_PORT			DEF_TNT_PORT
+											/* The following is the number
+												of milliseconds that TNT
+												will continue to transmit
+												if it encounters silence.
+												Probably best not to change
+												this. */
+#define TNT_SILENT_WINDOW	350
+
+
+/*----------------------------------------------------------------------------
+	ChTNT static member variables
+----------------------------------------------------------------------------*/
+
+ChTNT*				ChTNT::m_this = 0;
+int					ChTNT::m_iUsage = 0;
+TNT_HANDLE			ChTNT::m_hTNT = 0;
+
+ChTNTSessionMgr		ChTNT::m_tntSessions;
+chuint16			ChTNT::m_suTNTPort = 0;
+string				ChTNT::m_strTNTLocalHost;
+
+TNT_USER_INFO		ChTNT::m_userInfo;
+
+chuint32			ChTNT::m_luMikeVolume;
+chuint32			ChTNT::m_luMikeSensitivity;
+bool				ChTNT::m_boolRejectCalls;
+
+
+/*----------------------------------------------------------------------------
+	ChTNT public methods
+----------------------------------------------------------------------------*/
+
+ChTNT::ChTNT()
+{
+	if (0 == m_iUsage)
+	{
+		TNT_INITIALIZE			tntInit;
+		TNT_TRANSACTION_HANDLE	hTransaction;
+		TNT_RETCODE				retCode;
+
+		m_this = this;
+
+		ChMemClearStruct( &m_userInfo );
+		m_userInfo.wSizeOfUserInfo = sizeof( TNT_USER_INFO );
+
+		ChMemClearStruct( &tntInit );
+		tntInit.wSizeOfInitialize = sizeof( TNT_INITIALIZE );
+		tntInit.usListenPort = TNT_PORT;
+		tntInit.lpNotifyProc = NotifyProc;
+
+		#if defined( CH_DEBUG )
+		{
+			tntInit.dwDebugLevel = TNT_DEBUG_WARNING | TNT_DEBUG_ERROR |
+									TNT_DEBUG_TRACE | TNT_DEBUG_INFORMATION;
+		}
+		#endif	// defined( CH_DEBUG )
+
+		retCode = tntInitialize( &m_hTNT, &hTransaction, 0, &tntInit );
+
+		if (TNT_NO_ERROR != retCode)
+		{
+			#if defined( CH_DEBUG )
+			{
+				char		cBuffer[160];
+
+				sprintf( cBuffer, "TNT: Error calling tntInitialize (%hu)\n",
+										retCode );
+				TRACE( cBuffer );
+			}
+			#endif	// defined( CH_DEBUG )
+
+			m_hTNT = 0;
+		}
+		else
+		{
+			tntGetUserInfo( GetTNTHandle(), &m_userInfo );
+
+			m_userInfo.wSizeOfUserInfo = sizeof( TNT_USER_INFO );
+
+			tntSetUserInfo( GetTNTHandle(), &m_userInfo );
+			UpdatePrefs();
+		}
+	}
+
+	m_iUsage++;
+}
+
+
+ChTNT::~ChTNT()
+{
+	if (0 == --m_iUsage)
+	{
+		if (GetTNTHandle())
+		{
+			TNT_RETCODE			retCode;
+
+			retCode = tntCleanup( GetTNTHandle() );
+			if (TNT_NO_ERROR != retCode)
+			{
+				#if defined( CH_DEBUG )
+				{
+					char		cBuffer[160];
+
+					sprintf( cBuffer, "TNT: Error calling tntCleanup (%hu)\n",
+										retCode );
+					TRACE( cBuffer );
+				}
+				#endif	// defined( CH_DEBUG )
+			}
+		}
+
+		m_hTNT = 0;
+	}
+}
+
+
+/*----------------------------------------------------------------------------
+	ChTNT public methods
+----------------------------------------------------------------------------*/
+
+bool ChTNT::MakeCall( const string& strCallId, const string& strHost,
+						chuint16 suPort, chflag32 flOptions,
+						chflag32 flRemoteOptions )
+{
+	TNT_RETCODE				retCode;
+	TNT_TRANSACTION_HANDLE	hTransaction;
+	bool					boolSuccess;
+	chuint16				suFullDuplex;
+											// Copy information to be shared
+
+	ASSERT( TNT_MAX_LASTNAME_LENGTH > sizeof( chflag32 ) );
+
+	sprintf( m_userInfo.szLastName, "%d", flRemoteOptions );
+	strncpy( m_userInfo.szFirstName, (const char*)strCallId, TNT_MAX_LASTNAME_LENGTH );
+	m_userInfo.szFirstName[TNT_MAX_LASTNAME_LENGTH - 1] = '\0';
+
+	tntSetUserInfo( GetTNTHandle(), &m_userInfo );
+
+	retCode = tntSoundQueryDuplex( GetTNTHandle(), 0, 0, &suFullDuplex );
+	retCode = tntSoundSetDevices( GetTNTHandle(), 0, 0, !!suFullDuplex );
+	if (TNT_NO_ERROR != retCode)
+	{
+		#if defined( CH_DEBUG )
+		{
+			char		cBuffer[160];
+
+			sprintf( cBuffer, "TNT: Error calling tntSoundSetDevices (%hu)\n",
+								retCode );
+			TRACE( cBuffer );
+		}
+		#endif	// defined( CH_DEBUG )
+
+		boolSuccess = false;
+	}
+	else
+	{
+		TNT_USER_INFO		destUserInfo;
+
+		tntVoxSetGainControl( GetTNTHandle(), true, 180 );
+
+		ChMemClearStruct( &destUserInfo );
+		destUserInfo.wSizeOfUserInfo = sizeof( TNT_USER_INFO );
+		strcpy( destUserInfo.szNetAddress, (const char*)strHost );
+		destUserInfo.usPort = suPort;
+
+		retCode = tntSessionEstablish(	GetTNTHandle(), &hTransaction,
+											0, &destUserInfo, USE_UDP, 0 );
+		if (TNT_NO_ERROR != retCode)
+		{
+			#if defined( CH_DEBUG )
+			{
+				char		cBuffer[160];
+
+				sprintf( cBuffer,
+							"TNT: Error calling tntEstablishSession (%hu)\n",
+							retCode );
+				TRACE( cBuffer );
+			}
+			#endif	// defined( CH_DEBUG )
+
+			boolSuccess = false;
+		}
+	}
+
+	return boolSuccess;
+}
+
+
+bool ChTNT::Hangup( const string& strCallId )
+{
+	return m_tntSessions.Hangup( GetTNTHandle(), strCallId );
+}
+
+
+void ChTNT::UpdatePrefs()
+{
+	ChRegistry	reg( SOUND_PREFS_GROUP );
+	chint32		lVolume;
+
+	reg.ReadBool( SOUND_PREFS_REJECT_CALLS, m_boolRejectCalls,
+					SOUND_PREFS_REJECT_CALLS_DEF );
+
+	reg.Read( SOUND_PREFS_MIKE_VOLUME, m_luMikeVolume,
+				SOUND_PREFS_MIKE_VOLUME_DEF );
+	reg.Read( SOUND_PREFS_MIKE_SENSITIVITY, m_luMikeSensitivity,
+				SOUND_PREFS_MIKE_SENSITIVITY_DEF );
+
+	tntSoundSetRecordLevel( GetTNTHandle(), GetMikeVolume() );
+
+	if (0 == GetMikeVolume())
+	{
+		tntSoundMuteMicrophone( GetTNTHandle(), TNT_MUTE_MIKE );
+	}
+	else
+	{
+		tntSoundMuteMicrophone( GetTNTHandle(), TNT_UNMUTE_MIKE );
+	}
+
+	if (GetMikeSensitivity() < MIKE_SENSITIVITY_MIN)
+	{
+		m_luMikeSensitivity = MIKE_SENSITIVITY_MIN;
+	}
+
+	tntVoxSetActivationLevel( GetTNTHandle(),
+								(chuint16)GetMikeSensitivity() );
+
+	reg.Read( SOUND_PREFS_SPEECH_VOLUME, lVolume, SPEECH_OUT_VOLUME_MAX );
+	if (lVolume < 0)
+	{
+		lVolume = 0;
+	}
+	else if (lVolume > SPEECH_OUT_VOLUME_MAX)
+	{
+		lVolume = SPEECH_OUT_VOLUME_MAX;
+	}
+	tntSoundSetSpeakerVolume( GetTNTHandle(), lVolume );
+}
+
+
+/*----------------------------------------------------------------------------
+	ChTNT notification callback
+----------------------------------------------------------------------------*/
+
+TNT_RETCODE TNT_FAR TNT_PASCAL TNT_LOADDS 
+ChTNT::NotifyProc( TNT_HANDLE hTNT, unsigned short wMessage,
+					TNT_TRANSACTION_HANDLE hTransaction,
+    				unsigned long dwParam1, unsigned long dwParam2,
+    				TNT_USER_HANDLE hUser )
+{
+	#if defined( CH_DEBUG )
+	char		cBuffer[160];
+	#endif	// defined( CH_DEBUG )
+											// Get the 'this' pointer
+	switch (wMessage)
+	{
+		case TNT_NOTIFY_INIT_STATUS:
+		{
+			break;
+		}
+
+		case TNT_NOTIFY_LOCAL_IP_PORT:
+		{
+			char*		pstrAddress = (char*)dwParam1;
+			chuint16	suPort = (chuint16)dwParam2;
+
+			SetTNTPort( suPort );
+
+			#if defined( CH_DEBUG )
+			{
+				sprintf( cBuffer, "TNT: Local port is %hu\n", suPort );
+				TRACE( cBuffer );
+			}
+			#endif	// defined( CH_DEBUG )
+			break;
+		}
+
+		case TNT_NOTIFY_MIC_VOLUME_CHANGE:
+		{
+			return TNT_NO_ERROR;
+		}
+
+		case TNT_NOTIFY_SPEAKER_VOLUME_CHANGE:
+		{
+			return TNT_NO_ERROR;
+		}
+
+		case TNT_NOTIFY_BUFFER_LEVEL_CHANGE:
+		{
+			return TNT_NO_ERROR;
+		}
+
+		case TNT_NOTIFY_MIC_GAINMETER_CHANGE:
+		{
+			return TNT_NO_ERROR;
+		}
+
+		case TNT_NOTIFY_SESSION_STATUS:
+		{
+			TNT_SESSION_INFO*	pSessionInfo = (TNT_SESSION_INFO*)dwParam2;
+
+			switch( dwParam1 )
+			{
+				case TNT_SESSION_ESTABLISHED:
+				{
+					TNT_RETCODE			retCode;
+					TNT_SESSION_HANDLE	hSession;
+					string				strCallId;
+					chflag32			flOptions;
+
+					hSession = pSessionInfo->hSession;
+
+					strCallId = pSessionInfo->RemoteUserInfo.szFirstName;
+					flOptions =
+						atol( pSessionInfo->RemoteUserInfo.szLastName );
+
+					TRACE( "TNT: Call is established.\n" );
+
+					m_tntSessions.Set( strCallId, hSession, flOptions );
+
+					retCode = tntSoundHandsOffMode( hTNT, TNT_HANDS_OFF_MODE );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntSoundHandsOffMode (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+
+					retCode = tntSessionSetDelayBuffer( hTNT, hSession, 100 );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntSessionSetDelayBuffer (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+
+					retCode = tntVoxSetSilentWindow( hTNT, TNT_SILENT_WINDOW );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntVoxSetSilentWindow (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+
+					retCode = tntSoundSetSpeakerVolume( hTNT, 50 );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntSoundSetSpeakerVolume (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+
+					retCode = tntVoxSetActivationLevel( GetTNTHandle(),
+														GetMikeSensitivity() );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntVoxSetActivationLevel (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+
+					retCode = tntSoundSetRecordLevel( hTNT, GetMikeVolume() );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntSoundSetRecordLevel (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+					break;
+				}
+
+				case TNT_SESSION_RINGING:
+				{
+					TRACE( "TNT: Ring!\n" );
+					break;
+				}
+
+				case TNT_SESSION_INCOMING_CALL:
+				{
+					TNT_RETCODE				retCode;
+					unsigned long			dwResponse;
+					TNT_SESSION_HANDLE		hSession;
+
+					TRACE( "TNT: Incoming call.\n" );
+
+					hSession = pSessionInfo->hSession;
+
+					if (m_tntSessions.AllSessionsInUse())
+					{
+						dwResponse = TNT_SESSION_RESPONSE_BUSY;
+					}
+					else
+					{
+						dwResponse = TNT_SESSION_RESPONSE_ACCEPT;
+					}
+
+					retCode = tntSessionResponse( hTNT, 0, 0, hSession,
+													dwResponse );
+					if (TNT_NO_ERROR != retCode)
+					{
+						#if defined( CH_DEBUG )
+						{
+							sprintf( cBuffer,
+										"TNT: Error calling "
+										"tntSessionResponse (%hu)\n",
+										retCode );
+							TRACE( cBuffer );
+						}
+						#endif	// defined( CH_DEBUG )
+					}
+					break;
+				}
+
+				case TNT_SESSION_HANGUP:
+				{
+											// Clear the active session handle
+
+					m_tntSessions.ClearSessionHdl( pSessionInfo->hSession );
+
+					TRACE( "TNT: Hung up!\n" );
+					break;
+				}
+
+				case TNT_SESSION_XMIT:
+				{
+					return TNT_NO_ERROR;
+				}
+
+				case TNT_SESSION_RECV:
+				{
+					return TNT_NO_ERROR;
+				}
+
+				case TNT_SESSION_UNKNOWN_STATUS:
+				{
+					break;
+				}
+
+				default:
+				{
+					#if defined( CH_DEBUG )
+					{
+						//wsprintf(cBuffer, "Unknown response from remote user (%ld).", dwParam1);
+						//SendMessage(GetDlgItem(hNotifyDlg, IDC_NOTIFY_LIST), LB_INSERTSTRING, (WPARAM)-1, (long)cBuffer);
+					}
+					#endif	// defined( CH_DEBUG )
+					break;
+				}
+			}
+			break;
+		}	
+
+		case TNT_NOTIFY_SOUND_ENGINE_MODE:
+		{
+			switch( dwParam1 )
+			{
+				case TNT_SOUND_ENGINE_LISTEN_MODE:
+				{
+					break;
+				}
+
+				case TNT_SOUND_ENGINE_TALK_MODE:
+				{
+					break;
+				}
+			}
+			break;
+		}
+
+		case TNT_NOTIFY_SESSION_RESPONSE:
+		{
+			if (TNT_SESSION_RESPONSE_ACCEPT == dwParam2)
+			{
+				#if defined( CH_DEBUG )
+				{
+											// Call accepted!
+
+					strcpy( cBuffer, "TNT: Call has been accepted." );
+				}
+				#endif	// defined( CH_DEBUG )
+			}
+			else
+			{
+				switch (dwParam2)
+				{
+					case TNT_SESSION_RESPONSE_REJECT:
+					{
+						#if defined( CH_DEBUG )
+						{
+							strcpy( cBuffer, "TNT: Call has not been accepted." );
+						}
+						#endif	// defined( CH_DEBUG )
+						break;
+					}
+
+					case TNT_SESSION_RESPONSE_BUSY:
+					{
+						#if defined( CH_DEBUG )
+						{
+							strcpy( cBuffer, "TNT: Caller is busy." );
+						}
+						#endif	// defined( CH_DEBUG )
+						break;
+					}
+
+					case TNT_SESSION_RESPONSE_NOANSWER:
+					{
+						#if defined( CH_DEBUG )
+						{
+							strcpy( cBuffer, "TNT: Caller did not answer." );
+						}
+						#endif	// defined( CH_DEBUG )
+						break;
+					}
+
+					case TNT_SESSION_RESPONSE_BLOCK:
+					{
+						#if defined( CH_DEBUG )
+						{
+							strcpy( cBuffer, "TNT: Caller is blocking calls." );
+						}
+						#endif	// defined( CH_DEBUG )
+						break;
+					}
+
+					case TNT_SESSION_RESPONSE_VOICEMAIL:
+					{
+						#if defined( CH_DEBUG )
+						{
+							strcpy( cBuffer, "TNT: Speech mail system." );
+						}
+						#endif	// defined( CH_DEBUG )
+						break;
+					}
+
+					default:
+					{
+						#if defined( CH_DEBUG )
+						{
+							strcpy( cBuffer, "TNT: UNKNOWN CALL RESPONSE\n" );
+						}
+						#endif	// defined( CH_DEBUG )
+						break;
+					}
+				}
+			}
+
+			#if defined( CH_DEBUG )
+			{
+				TRACE( cBuffer );
+			}
+			#endif	// defined( CH_DEBUG )
+			break;
+		}
+
+		#if defined( CH_DEBUG )
+
+		case TNT_NOTIFY_DEBUG_MESSAGE:
+		{
+			char*	pstrError = (char*)dwParam2;
+
+			TRACE( pstrError );
+			TRACE( "\n" );
+			break;
+		}
+
+		#endif	// defined( CH_DEBUG )
+
+		default:
+		{
+			#if defined( CH_DEBUG )
+			{
+				sprintf( cBuffer, "TNT: Unknown notification message (%ld).",
+									wMessage );
+				TRACE( cBuffer );
+			}
+			#endif	// defined( CH_DEBUG )
+			break;
+		}
+	}
+
+	return TNT_NO_ERROR;
+}
+
+
+/*----------------------------------------------------------------------------
+	ChTNTSessionMgr public methods
+----------------------------------------------------------------------------*/
+
+ChTNTSessionMgr::ChTNTSessionMgr() :
+						m_iSessions( 0 )
+{
+	for (int iLoop = 0; iLoop < SESSION_LIMIT; iLoop++)
+	{
+		SetInUse( iLoop, false );
+	}
+}
+
+
+ChTNTSessionMgr::~ChTNTSessionMgr()
+{
+}
+
+
+bool ChTNTSessionMgr::Set( const string& strCallId,
+							TNT_SESSION_HANDLE hSession,
+							chflag32 flOptions )
+{
+	bool			boolSuccess = false;
+	ChTNTSession*	pFoundSession = 0;
+	int				iLoc;
+
+	if (0 == (pFoundSession = Find( strCallId, &iLoc )))
+	{
+		if (SESSION_LIMIT > GetSessionCount())
+		{
+			iLoc = 0;
+
+			while ((0 == pFoundSession) && (iLoc < SESSION_LIMIT))
+			{
+				if (!IsInUse( iLoc ))
+				{
+					pFoundSession = GetSession( iLoc );
+				}
+				else
+				{
+					iLoc++;
+				}
+			}
+		}
+	}
+
+	if (pFoundSession)
+	{
+		SetInUse( iLoc );
+
+		pFoundSession->Set( hSession, strCallId, flOptions );
+
+		boolSuccess = true;
+	}
+
+	return boolSuccess;
+}
+
+
+TNT_SESSION_HANDLE ChTNTSessionMgr::
+						GetSessionHandle( const string& strCallId,
+											chflag32* pflOptions )
+{
+	TNT_SESSION_HANDLE		hSession = 0;
+	ChTNTSession*			pSession;
+
+	if (pSession = Find( strCallId ))
+	{
+		hSession = pSession->GetSessionHdl();
+
+		if (pflOptions)
+		{
+			*pflOptions = pSession->GetOptions();
+		}
+	}
+
+	return hSession;
+}
+
+
+bool ChTNTSessionMgr::Hangup( TNT_HANDLE hTNT, const string& strCallId )
+{
+	TNT_SESSION_HANDLE		hSession = 0;
+	bool					boolSuccess = true;
+
+	if (!strCallId.IsEmpty())
+	{										// Look up the session by call id
+
+		hSession = GetSessionHandle( strCallId );
+	}
+
+	if (hSession)
+	{
+		boolSuccess = Hangup( hTNT, hSession );
+	}
+	else
+	{
+		for (int iLoop = 0; iLoop < SESSION_LIMIT; iLoop++)
+		{
+			if (IsInUse( iLoop ))
+			{
+				boolSuccess = boolSuccess &&
+								Hangup( hTNT,
+										GetSession( iLoop )->GetSessionHdl() );
+			}
+		}
+	}
+
+	return boolSuccess;
+}
+
+
+bool ChTNTSessionMgr::ClearSession( const string& strCallId )
+{
+	int		iLoc;
+	bool	boolFound;
+
+	if (boolFound = (0 != Find( strCallId, &iLoc )))
+	{
+		SetInUse( iLoc, false );
+	}
+
+	return boolFound;
+}
+
+
+bool ChTNTSessionMgr::ClearSessionHdl( TNT_SESSION_HANDLE hSession )
+{
+	bool		boolFound = false;
+	int			iLoop;
+
+	for (iLoop = 0; iLoop < SESSION_LIMIT; iLoop++)
+	{
+		if (IsInUse( iLoop ) &&
+			(GetSession( iLoop )->GetSessionHdl() == hSession))
+		{
+			SetInUse( iLoop, false );
+
+			boolFound = true;
+		}
+	}
+
+	return boolFound;
+}
+
+
+/*----------------------------------------------------------------------------
+	ChTNTSessionMgr protected methods
+----------------------------------------------------------------------------*/
+
+ChTNTSession* ChTNTSessionMgr::Find( const string& strCallId, int* piLoc )
+{
+	ChTNTSession*	pFoundSession = 0;
+
+	if (0 != GetSessionCount())
+	{
+		int		iLoop = 0;
+
+		while ((0 == pFoundSession) && (iLoop < SESSION_LIMIT))
+		{
+			if (IsInUse( iLoop ))
+			{
+				if (GetSession( iLoop )->GetId() == strCallId)
+				{
+					pFoundSession = GetSession( iLoop );
+
+					if (piLoc)
+					{
+						*piLoc = iLoop;
+					}
+				}
+			}
+
+			iLoop++;
+		}
+	}
+
+	return pFoundSession;
+}
+
+
+ChTNTSession* ChTNTSessionMgr::Find( TNT_SESSION_HANDLE hSession,
+										int* piLoc )
+{
+	ChTNTSession*	pFoundSession = 0;
+
+	if (0 != GetSessionCount())
+	{
+		int		iLoop = 0;
+
+		while ((0 == pFoundSession) && (iLoop < SESSION_LIMIT))
+		{
+			if (IsInUse( iLoop ))
+			{
+				if (GetSession( iLoop )->GetSessionHdl() == hSession)
+				{
+					pFoundSession = GetSession( iLoop );
+
+					if (piLoc)
+					{
+						*piLoc = iLoop;
+					}
+				}
+			}
+
+			iLoop++;
+		}
+	}
+
+	return pFoundSession;
+}
+
+
+bool ChTNTSessionMgr::Hangup( TNT_HANDLE hTNT, TNT_SESSION_HANDLE hSession )
+{
+	TNT_RETCODE			retCode;
+	TNT_TRANSACTION_HANDLE	hTransaction;
+	bool					boolSuccess = true;
+
+	retCode = tntSessionHangup( hTNT, &hTransaction, 0, hSession );
+	if (TNT_NO_ERROR != retCode)
+	{
+		#if defined( CH_DEBUG )
+		{
+			char		cBuffer[160];
+
+			sprintf( cBuffer, "TNT: Error calling tntHangupSession (%hu)\n",
+								retCode );
+			TRACE( cBuffer );
+		}
+		#endif	// defined( CH_DEBUG )
+
+		boolSuccess = false;
+	}
+
+	return boolSuccess;
+}
+
+
+/*----------------------------------------------------------------------------
+	ChTNTSession public methods
+----------------------------------------------------------------------------*/
+
+ChTNTSession::ChTNTSession()
+{
+}
+
+
+ChTNTSession::~ChTNTSession()
+{
+}
+
+
+#endif	// defined( CH_USE_VOXWARE )
+
+
+// Local Variables: ***
+// tab-width:4 ***
+// End: ***

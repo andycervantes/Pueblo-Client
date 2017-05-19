@@ -1,0 +1,256 @@
+/*----------------------------------------------------------------------------
+                        _                              _ _       
+        /\             | |                            | (_)      
+       /  \   _ __   __| |_ __ ___  _ __ ___   ___  __| |_  __ _ 
+      / /\ \ | '_ \ / _` | '__/ _ \| '_ ` _ \ / _ \/ _` | |/ _` |
+     / ____ \| | | | (_| | | | (_) | | | | | |  __/ (_| | | (_| |
+    /_/    \_\_| |_|\__,_|_|  \___/|_| |_| |_|\___|\__,_|_|\__,_|
+
+    The contents of this file are subject to the Andromedia Public
+	License Version 1.0 (the "License"); you may not use this file
+	except in compliance with the License. You may obtain a copy of
+	the License at http://www.andromedia.com/APL/
+
+    Software distributed under the License is distributed on an
+	"AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+	implied. See the License for the specific language governing
+	rights and limitations under the License.
+
+    The Original Code is Pueblo client code, released November 4, 1998.
+
+    The Initial Developer of the Original Code is Andromedia Incorporated.
+	Portions created by Andromedia are Copyright (C) 1998 Andromedia
+	Incorporated.  All Rights Reserved.
+
+	Andromedia Incorporated                         415.365.6700
+	818 Mission Street - 2nd Floor                  415.365.6701 fax
+	San Francisco, CA 94103
+
+    Contributor(s):
+	--------------------------------------------------------------------------
+	   Chaco team:  Dan Greening, Glenn Crocker, Jim Doubek,
+	                Coyote Lussier, Pritham Shetty.
+
+					Wrote and designed original codebase.
+
+------------------------------------------------------------------------------
+
+	This file contains the interfaces for VRML Sphere classes.
+
+----------------------------------------------------------------------------*/
+
+// $Header: /home/cvs/chaco/modules/client/portable/ChGraphx/GxSphere.h,v 1.4 1996/03/29 01:10:58 jimd Exp $
+
+#ifndef _GX_SPHERE_H_
+#define _GX_SPHERE_H_
+
+#include "GxTypes.h"
+#include "GxUtils.h"
+
+
+/*----------------------------------------------------------------------------
+	GxSphere class
+
+	GfxSphere tessellates a sphere by subdividing an octahedron and pushing
+	each point to lie on the sphere. It performs and maintains the
+	tessellation only for one octant, namely +x,+y,+z.
+
+	The density of the tessellation is controlled by level.
+----------------------------------------------------------------------------*/
+
+class GxSphere
+{
+	public:
+		enum IType { Direct, Indexed };		// Used by the iterators
+
+	public:
+		GxSphere( int level = 1 );
+		GxSphere( const GxSphere& );
+		virtual ~GxSphere();
+
+		static int VertsInLevel( int lvl );
+		static int TrisInLevel( int lvl );
+
+		GxSphere&		operator=( const GxSphere& );
+
+		inline int		Level() const     { return m_pLevel; }
+
+		inline int		NumVerts() const  { return m_pNumVerts; }
+		inline GxVec3f*	Vertices() const  { return m_pVertices; }
+		inline GxVec2f*	TexCoords() const { return m_pTexCoords; }
+
+	public:
+		static int		iOctantOrdering[8][3];	// list of octants in order
+		static int		iOctantDirection[8];	// Clockwise/Counter Clockwise
+
+	protected:
+		virtual void	Tessellate();
+
+	protected:
+		int				m_pLevel;
+		int				m_pNumVerts;
+		GxVec3f*		m_pVertices;
+		GxVec2f*		m_pTexCoords;
+
+	private:
+		void			Kill();
+		void			Copy( const GxSphere& );
+};
+
+
+/*----------------------------------------------------------------------------
+	GxSphereVertexIterator class
+
+	Iterate through all the vertices in the sphere. Note that vertices
+	along the octant edges are repeated. This increases the vertex count
+	very slightly. The index of a given vertex will be identical to the
+	those referred in the other iterators. So this may be used to make a
+	list of vertices, over which triangles, tristrips and trifans are built.
+----------------------------------------------------------------------------*/
+
+class GxSphereVertexIterator
+{
+	public:
+		GxSphereVertexIterator();
+		GxSphereVertexIterator( const GxSphere& sph );
+
+		virtual ~GxSphereVertexIterator();
+
+		virtual void Attach( const GxSphere& sph );
+		virtual int NumVertices() const;
+		virtual int Iterate();
+
+		virtual int DoVertex( int, const GxVec3f& );
+
+   protected:
+		const GxSphere*		m_pSphere;
+
+   private:
+											/* Disable copy constructor and
+												assignment operator */
+
+      inline GxSphereVertexIterator( const GxSphereVertexIterator& ) {}
+      inline GxSphereVertexIterator& operator=( const GxSphereVertexIterator& )
+      			{
+      				return *this;
+      			}
+};
+
+
+/*----------------------------------------------------------------------------
+	GxSphereTriangleIterator class
+
+	Iterate through all the vertices in the sphere. Two kinds of iterations
+	are possible, one which explicitly returns the vertex coordinates, other
+	which returns the vertex indices, these indices correspond to the ones
+	generated by the vertex iterator.
+----------------------------------------------------------------------------*/
+
+class GxSphereTriangleIterator
+{
+	public:
+		GxSphereTriangleIterator();
+		GxSphereTriangleIterator( const GxSphere& sph );
+
+		virtual GxSphereTriangleIterator::~GxSphereTriangleIterator();
+
+		virtual void Attach( const GxSphere& sph );
+		virtual int NumTriangles() const;
+		virtual int Iterate( GxSphere::IType itp = GxSphere::Direct );
+		virtual int DoTriangle( int, int, int, int );
+		virtual int DoTriangle( int, const GxVec3f&, const GxVec3f&,
+									const GxVec3f& );
+
+	protected:
+		const GxSphere*		m_pSphere;
+
+	private:
+		int TriOut( int tri, int vbase, int a, int b, int c, int d, int isclk,
+					GxSphere::IType itp, GxVec3f* vs, int sx, int sy, int sz );
+		int TriOut( int tri, int vbase, int a, int b, int c, int isclk,
+					GxSphere::IType itp, GxVec3f* vs, int sx, int sy, int sz );
+
+											/* Disable copy constructor and
+												assignment operator */
+
+      inline GxSphereTriangleIterator( const GxSphereTriangleIterator& ) {}
+      inline GxSphereTriangleIterator& operator=( const GxSphereTriangleIterator& )
+      			{
+      				return *this;
+      			}
+};
+
+
+/*----------------------------------------------------------------------------
+	GxSphereTriStripIterator class
+----------------------------------------------------------------------------*/
+
+class GxSphereTriStripIterator
+{
+	public:
+		GxSphereTriStripIterator();
+		GxSphereTriStripIterator( const GxSphere& sph );
+
+		virtual ~GxSphereTriStripIterator();
+
+		virtual void Attach( const GxSphere& sph );
+		virtual int NumStrips();
+
+		virtual int Iterate( GxSphere::IType itp = GxSphere::Direct );
+
+		virtual int StartStrip( int );
+		virtual int StopStrip( int );
+		virtual int DoVertex( int );
+		virtual int DoVertex( const GxVec3f& );
+
+   private:
+											/* Disable copy constructor and
+												assignment operator */
+
+      inline GxSphereTriStripIterator( const GxSphereTriStripIterator& ) {}
+      inline GxSphereTriStripIterator& operator=( const GxSphereTriStripIterator& )
+      			{
+      				return *this;
+      			}
+
+	protected:
+		const GxSphere*		m_pSphere;
+};
+
+
+/*----------------------------------------------------------------------------
+	GxSphereTriStripIterator class
+
+	Generate texture coordinates corresponding to the vertices generated
+	by the vertex iterator.
+----------------------------------------------------------------------------*/
+
+class GxSphereTextureIterator
+{
+	public:
+		GxSphereTextureIterator();
+		GxSphereTextureIterator( const GxSphere& sph );
+
+		virtual ~GxSphereTextureIterator();
+
+		virtual void Attach( const GxSphere& sph );
+		virtual int NumTextures() const;
+		virtual int Iterate();
+		virtual int DoTexture( int, const GxVec2f& );
+
+	protected:
+		const GxSphere*		m_pSphere;
+
+	private:
+											/* Disable copy constructor and
+												assignment operator */
+
+      inline GxSphereTextureIterator( const GxSphereTextureIterator& ) {}
+      inline GxSphereTextureIterator& operator=( const GxSphereTextureIterator& )
+      			{
+      				return *this;
+      			}
+};
+
+
+#endif // _GX_SPHERE_H_

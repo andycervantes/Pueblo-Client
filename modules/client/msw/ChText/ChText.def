@@ -1,0 +1,40 @@
+;-----------------------------------------------------------------------------
+;
+;           .###.  ###     ###       ,#,          .###.    ,#######,
+;        ,####""   ###    .###     ,##'##,     ,####""   .##'    `##.
+;       ###        ###########    ,##' `##,   ###       ####      ####
+;       ###..      ###'    ###  ,###########, ####..    `###,    ,##'
+;         `######  ###     ###  `##'     `##'   `######   `########'
+;
+;
+;	Copyright 1994 Chaco Communications, Inc. All rights reserved.
+;	Unpublished -- Rights reserved under the copyright laws of the United
+;	States.  Use of a copyright notice is precautionary only and does no
+;	imply publication or disclosure.
+;
+;	This software contains confidential information and trade secrets of
+;	Chaco Communications, Inc.  Use, disclosure, or reproduction is
+;	prohibited without the prior express written permission of Chaco
+;	Communications, Inc.
+;
+;						RESTRICTED RIGHTS LEGEND
+;
+;	Use, duplication, or disclosure by the Government is subject to
+;	restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+;	Technical Data and Computer Software clause at DFARS 252.227-7013.
+;
+;	Chaco Communications, Inc.
+;	10164 Parkwood Drive, Suite 8, Cupertino, CA, 95014-1533
+;
+;------------------------------------------------------------------------------
+;
+;	Declares the module parameters for the DLL.
+;
+;------------------------------------------------------------------------------
+
+; $Header: /home/cvs/chaco/modules/client/msw/ChText/ChText.def,v 2.0 1995/05/11 00:12:44 coyote Exp $
+
+LIBRARY      CHTEXT
+DESCRIPTION  'ChText client module for Pueblo'
+
+EXPORTS

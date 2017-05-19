@@ -1,0 +1,84 @@
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; Help Project File for PUEBLO 
+;
+;  This file is maintained by RoboHELP.  Do not modify this file directly.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+[OPTIONS]
+TITLE=Pueblo
+BUILD=WINDOWS
+NOTES=1
+OPTCDROM=0
+COPYRIGHT=Copyright © 1995 Chaco Communications, Inc.
+OLDKEYPHRASE=NO
+REPORT=NO
+BMROOT=D:\CHACO\HELP\GRAF
+BMROOT=D:\CHACO\HELP\PUEBLO32\GRAF
+ERRORLOG=D:\chaco\help\pueblo32\Pueblo.ERR
+COMPRESS=12
+BMROOT=D:\CHACO\HELP\PUEBLO32 
+[BUILDTAGS]
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; The Build Tags section specifies to the Help Compiler the names
+; of all the valid build tags used in this Help project.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+WINDOWS
+
+
+[CONFIG]
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; The Config section defines macros which will run at startup.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ 
+ 
+
+
+[FILES]
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; The Files section specifies the RTF files for a project.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+PUEBLO.RTF
+D:\CHACO\HELP\SHARED\MUDTERMS.RTF
+D:\CHACO\HELP\SHARED\PBLOHTML.RTF
+D:\CHACO\HELP\SHARED\VRML.RTF
+D:\CHACO\HELP\SHARED\VRMLMOVE.RTF
+D:\CHACO\HELP\SHARED\DEFS.RTF
+D:\CHACO\HELP\SHARED\CHACO.RTF
+D:\CHACO\HELP\SHARED\TINTIN.RTF
+D:\chaco\help\shared\PBLOVRML.RTF
+[ALIAS]
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; The Alias section sets up aliases for Topic IDs in your Help system.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+[MAP]
+;                                                                                     
+;                                                
+;                                                                                     
+;                                                                                                                                                                                                                                
+;
+
+#include <D:\CHACO\CLIENT\MSW\HLP\PUEBLO.HM>
+#include <D:\BIN\MSVC22\MFC\include\AFXHELP.HM>
+[BITMAPS]
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; The Bitmaps section specifies the referenced bitmaps used in
+; your help system.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+[WINDOWS]
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+; The Windows section contains all of the information about the windows
+; in a Help project.
+;* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+;Gloss = "Glossary",(100,100,350,350),0,(255,255,255),(255,255,255)
+
+
+main="",,29188,(192,192,192),(0,128,0),f0
+(w95sec)="",(573,92,409,860),20740,(255,255,224),(0,128,0),f2
+[BAGGAGE]

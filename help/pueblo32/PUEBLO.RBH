@@ -1,0 +1,40 @@
+[Project]
+Help Compiler=HCW.EXE
+Remove Unused=0
+Version=512
+ConvertedFromV1=0
+HasGlossary=0
+Automatic Map Files=0
+NextFile=10
+IncludeRTF=0
+Extra Language=0
+[Document Files]
+PUEBLO.DOC=1
+D:\chaco\help\shared\MUDTERMS.DOC=2
+D:\chaco\help\shared\PBLOHTML.DOC=3
+D:\chaco\help\shared\VRML.DOC=4
+D:\chaco\help\shared\VRMLMOVE.DOC=5
+D:\chaco\help\shared\DEFS.DOC=6
+D:\chaco\help\shared\CHACO.DOC=7
+D:\chaco\help\shared\TINTIN.DOC=8
+D:\chaco\help\shared\PBLOVRML.DOC=9
+[File Properties]
+HasProperties=1
+BrowseType=0
+AutoMapFile=1
+StartingWith=0
+IncrementBy=20
+NextTopicNumber=0
+StartingNumber=1
+BrowseString=PUEBLO:0
+DefaultBuildTag=
+[.RBH]
+CopyTo=0
+PreBatch=
+PostBatch=
+AutoFixRTF=0
+CurrentDir=D:\BIN\MSVC22\MFC\include
+[FINDLINK_PAIRS]
+closeable=About_worlds
+[FINDLINK]
+FindText0=closeable

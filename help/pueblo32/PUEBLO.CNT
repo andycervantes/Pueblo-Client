@@ -1,0 +1,48 @@
+:Base PUEBLO.HLP
+:Title Pueblo
+1 The Pueblo Client
+2 Overview=Pueblo_overview@PUEBLO.HLP>main
+2 Installing Plugins=Installing_Plugins@PUEBLO.HLP>main
+2 What's New?=revision_history@PUEBLO.HLP>main
+2 How to...=how_to_list@PUEBLO.HLP>(w95sec)
+2 The Pueblo User Interface
+3 Overview=HIDR_MAINFRAME@PUEBLO.HLP>main
+3 The World List=HIDR_MAINFRAME
+3 The Text Input Window=window_text_input
+3 TinTin commands=TinTin
+3 The Status Bar=AFX_HIDW_STATUS_BAR
+3 The Toolbar=AFX_HIDW_TOOLBAR
+2 Menus
+3 File menu=menu_file@PUEBLO.HLP>(w95sec)
+3 Edit menu=menu_edit@PUEBLO.HLP>(w95sec)
+3 View menu=menu_view@PUEBLO.HLP>(w95sec)
+3 Worlds menu=menu_worlds@PUEBLO.HLP>(w95sec)
+3 Help menu=menu_help@PUEBLO.HLP>(w95sec)
+1 About Worlds
+2 Overview=About_worlds
+2 Types of Worlds=Types_of_worlds
+2 Creating a Character=Creating_a_Character@PUEBLO.HLP>main
+2 Etiquette=Etiquette@PUEBLO.HLP>main
+2 Terminology=terminology@PUEBLO.HLP>main
+1 Pueblo World Programmers' Information
+2 Overviews
+3 Pueblo Enhancers Guide=Pueblo_Enhancers_Guide@PUEBLO.HLP>main
+3 ANSI vs. HTML color=ANSI_vs_HTML_color
+3 Creating and using HTML dialogs=Creating_and_using_HTML_dialogs@PUEBLO.HLP>main
+3 Using plugins=Using_Plugins@PUEBLO.HLP>main
+3 Adding Avatar support in VRML spaces=ext_vrml_avatars@PUEBLO.HLP>main
+2 Reference
+3 Standard HTML elements=html_standard_elements@PUEBLO.HLP>main
+3 Pueblo HTML extensions=html_pueblo_extensions@PUEBLO.HLP>main
+3 Pueblo VRML extensions=vrml_pueblo_extensions@PUEBLO.HLP>main
+1 About Chaco Communications, Inc.
+2 Corporate Overview
+3 About Chaco=About_Chaco_Communications_Inc@PUEBLO.HLP>main
+3 Chaco Corporate Values=Chaco_Corporate_Values@PUEBLO.HLP>main
+2 Other Chaco Products
+3 VR Scout=VR_Scout@PUEBLO.HLP>main
+2 Recipes
+3 Cupertino Cilantro Pesto Linguine=Recipe_Cupertino_Cilantro_Pesto_Linguine@PUEBLO.HLP>(w95sec)
+3 Kalamata Olivada=Recipe_Kalamata_Olivada@PUEBLO.HLP>(w95sec)
+3 Mom's Baked Apple Pancakes=Recipe_Mom_s_Baked_Apple_Pancakes@PUEBLO.HLP>(w95sec)
+3 Ventana Eggplant Burgers=Recipe_Ventana_Eggplant_Burgers@PUEBLO.HLP>(w95sec)
